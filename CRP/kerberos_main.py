@@ -1,68 +1,49 @@
-from cryptography.fernet import Fernet
-import time
+import kerberos
 
-# Key Distribution Center (KDC)
-class KDC:
-    def __init__(self):
-        self.tgs_key = Fernet.generate_key()  # Key for Ticket Granting Service (TGS)
-        self.clients = {}  # Store client passwords
+class KerberosClient:
+    def __init__(self, service_name):
+        self.service_name = service_name
+        self.context = None
 
-    def register_client(self, client_name, client_password):
-        self.clients[client_name] = Fernet(client_password)
+    def authenticate(self):
+        # Initialize the Kerberos context
+        result, self.context = kerberos.authGSSClientInit(f"{self.service_name}@YDOMAIN")
+        """
+        krb5.conf file configured to point to the KDC and TGS. The client should also have a valid Kerberos ticket, which can be obtained using the kinit command.
+        
+        """
+        if result < 0:
+            raise Exception("Failed to initialize Kerberos context")
 
-    def get_tgs_ticket(self, client_name, client_password):
-        if client_name in self.clients:
-            client_cipher = Fernet(client_password)
-            ticket = client_cipher.encrypt(self.tgs_key)
-            return ticket
-        else:
-            raise ValueError("Client not registered.")
+        # Begin the Kerberos authentication process
+        result = kerberos.authGSSClientStep(self.context, "")
+        if result < 0:
+            raise Exception("Failed in the first step of Kerberos authentication")
 
-# Ticket Granting Service (TGS)
-class TGS:
-    def __init__(self, kdc):
-        self.kdc = kdc
-        self.service_keys = {}
+        # Continue the Kerberos authentication process
+        while result == 1:
+            challenge = kerberos.authGSSClientResponse(self.context)
+            result = kerberos.authGSSClientStep(self.context, challenge)
+            if result < 0:
+                raise Exception("Failed in the subsequent steps of Kerberos authentication")
 
-    def register_service(self, service_name):
-        self.service_keys[service_name] = Fernet.generate_key()
-
-    def get_service_ticket(self, service_name, ticket):
-        tgs_cipher = Fernet(self.kdc.tgs_key)
-        client_password = tgs_cipher.decrypt(ticket)
-        client_cipher = Fernet(client_password)
-        service_key = self.service_keys[service_name]
-        service_ticket = client_cipher.encrypt(service_key)
+        # If authentication is successful, retrieve the service ticket
+        service_ticket = kerberos.authGSSClientResponse(self.context)
         return service_ticket
 
-# Service (e.g., a file server)
-class Service:
-    def __init__(self, service_name, tgs):
-        self.service_name = service_name
-        self.tgs = tgs
-        self.key = self.tgs.service_keys[service_name]
+    def cleanup(self):
+        # Clean up the Kerberos context
+        kerberos.authGSSClientClean(self.context)
 
-    def access_service(self, service_ticket, client_password):
-        client_cipher = Fernet(client_password)
-        service_key = client_cipher.decrypt(service_ticket)
-        if service_key == self.key:
-            return "Access granted!"
-        else:
-            return "Access denied!"
 
 if __name__ == "__main__":
-    kdc = KDC()
-    tgs = TGS(kdc)
     service_name = "file_server"
-    tgs.register_service(service_name)
-    service = Service(service_name, tgs)
+    kerberos_client = KerberosClient(service_name)
 
-    client_name = "Alice"
-    client_password = Fernet.generate_key()
-    kdc.register_client(client_name, client_password)
-
-    tgs_ticket = kdc.get_tgs_ticket(client_name, client_password)
-    service_ticket = tgs.get_service_ticket(service_name, tgs_ticket)
-
-    response = service.access_service(service_ticket, client_password)
-    print(response)
+    try:
+        service_ticket = kerberos_client.authenticate()
+        print(f"Successfully obtained service ticket: {service_ticket}")
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        kerberos_client.cleanup()
