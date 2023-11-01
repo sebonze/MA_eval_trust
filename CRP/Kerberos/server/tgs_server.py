@@ -1,18 +1,19 @@
 #!/usr/bin/python
-from time import time
+import time
 from ast import literal_eval
-import key_distribution as db
+import CRP.Kerberos.server.key_distribution as db
 import uuid
-import server
-import cgi
+import CRP.Kerberos.server.server as server
 
 import sys
-sys.path.insert(0, '../lib')
-import lib
+
+sys.path.append('CRP/Kerberos/lib')
+import CRP.Kerberos.lib.lib as lib
 
 SERVER = 'localhost'
 PORT_NUMBER = 8081
-TIMEOUT = 60*60 #An hour
+TIMEOUT = 60 * 60  # An hour
+
 
 class TGSServer(server.ResponseServer):
     def response(self, TGT_ID, authenticator_encrypted, addr):
@@ -39,7 +40,8 @@ class TGSServer(server.ResponseServer):
         # Client-to-server ticket
 
         SS_session_key_encrypted = lib.encrypt(SS_session_key, TGS_session_key)
-        return (CTS_encrypted, SS_session_key_encrypted)
+        return CTS_encrypted, SS_session_key_encrypted
+
 
 if __name__ == '__main__':
     server.start(TGSServer, db.TGS_NAME, SERVER, PORT_NUMBER)

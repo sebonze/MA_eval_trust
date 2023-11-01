@@ -1,18 +1,13 @@
 #!/usr/bin/python
-from time import time
-from ast import literal_eval
-import uuid
-import server
-import cgi
 
-import sys
-sys.path.insert(0, '../lib')
-import lib
+import CRP.Kerberos.server.server as server
+import CRP.Kerberos.lib.lib as lib
 
 SERVER = 'localhost'
 PORT_NUMBER = 8083
-TIMEOUT = 60*60 #An hour
+TIMEOUT = 60 * 60  # An hour
 NAME = 'Bad'
+
 
 class SSServerBad(server.ResponseServer):
     def response(self, CTS_encrypted, authenticator_encrypted, addr):
@@ -26,11 +21,11 @@ class SSServerBad(server.ResponseServer):
         confirmation = lib.encrypt('0', SS_session_key)
         # send faulty timestamp
 
-        return (confirmation, )
+        return (confirmation,)
 
     def resolve(self, CTS_encrypted, message, addr):
         return 'You should never connect to me!'
 
+
 if __name__ == '__main__':
     server.start(SSServerBad, NAME, SERVER, PORT_NUMBER)
-

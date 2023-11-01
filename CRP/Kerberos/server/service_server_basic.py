@@ -1,20 +1,16 @@
 #!/usr/bin/python
 from time import time
 from ast import literal_eval
-import uuid
-import server
-import cgi
+import CRP.Kerberos.server.server as server
 import os
-
-import sys
-sys.path.insert(0, '../lib')
-import lib
+import CRP.Kerberos.lib.lib as lib
 
 FOLDER = os.path.dirname(os.path.realpath(__file__))
 SERVER = 'localhost'
 PORT_NUMBER = 8082
-TIMEOUT = 60*60 #An hour
+TIMEOUT = 60 * 60  # An hour
 NAME = 'Basic'
+
 
 class SSServerBasic(server.ResponseServer):
     def response(self, CTS_encrypted, authenticator_encrypted, addr):
@@ -28,7 +24,7 @@ class SSServerBasic(server.ResponseServer):
         confirmation = lib.encrypt(timestamp, SS_session_key)
         # send the user's timestamp back to them as a confirmation of login
 
-        return (confirmation, )
+        return (confirmation,)
 
     def resolve(self, CTS_encrypted, message, addr):
         CTS = literal_eval(lib.decrypt(CTS_encrypted, self.private_key))
@@ -39,10 +35,10 @@ class SSServerBasic(server.ResponseServer):
         return self.process_msg(message, CTS[0])
 
     def process_msg(self, message, user):
-        print ('received {} from {}'.format(message, user))
+        print('received {} from {}'.format(message, user))
         with open('{}/response.txt'.format(FOLDER)) as reader:
             return reader.read()
 
+
 if __name__ == '__main__':
     server.start(SSServerBasic, NAME, SERVER, PORT_NUMBER)
-

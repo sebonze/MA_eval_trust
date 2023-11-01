@@ -1,17 +1,15 @@
 #!/usr/bin/python
 from time import time
-import key_distribution as db
+import CRP.Kerberos.server.key_distribution as db
 import uuid
-import server
+import CRP.Kerberos.server.server as server
 import cgi
-
-import sys
-sys.path.insert(0, '../lib')
-import lib
+import CRP.Kerberos.lib.lib as lib
 
 SERVER = 'localhost'
 PORT_NUMBER = 8080
-TIMEOUT = 60*60 #An hour
+TIMEOUT = 60 * 60  # An hour
+
 
 class AuthenticationServer(server.ResponseServer):
     def response(self, username, _, addr):
@@ -25,17 +23,17 @@ class AuthenticationServer(server.ResponseServer):
         TGS_server_key = db.retrieve_server(db.TGS_NAME)
         TGT_encrypted = lib.encrypt_tuple(TGT, TGS_server_key)
 
-        return (TGS_encrypted, TGT_encrypted)
+        return TGS_encrypted, TGT_encrypted
 
-
-    #Handler for the GET requests
+    # Handler for the GET requests
     def do_POST(self):
+        print("DEBUG TRIGGERED GET REQUEST")
         # Parse the form data posted
         form = cgi.FieldStorage(
-            fp=self.rfile, 
+            fp=self.rfile,
             headers=self.headers,
-            environ={'REQUEST_METHOD':'POST',
-                     'CONTENT_TYPE':self.headers['Content-Type'],
+            environ={'REQUEST_METHOD': 'POST',
+                     'CONTENT_TYPE': self.headers['Content-Type'],
                      })
 
         # Begin the response
@@ -46,6 +44,7 @@ class AuthenticationServer(server.ResponseServer):
         result = db.configure_user(username, password)
         self.wfile.write('Response: {}'.format(result))
         return
+
 
 if __name__ == '__main__':
     server.start(AuthenticationServer, db.AS_NAME, SERVER, PORT_NUMBER)
