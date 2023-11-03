@@ -14,7 +14,7 @@ from Crypto.Cipher import AES
 import hashlib
 import urllib
 import os
-from ast import literal_eval
+import ast
 
 
 def egcd(a, b):
@@ -369,10 +369,10 @@ def encrypt(txt, key):
     key = str(key)
     key = one_way_hash(key)
     key = str(key)
-    txt = pad(txt)
+    txt = pad(txt).encode("utf8")
     key = pad(key)
     iv = os.urandom(16)[0:16]
-    cipher = AES.new(key, AES.MODE_CBC, iv)
+    cipher = AES.new(key.encode("utf8"), AES.MODE_CBC, iv)
     return base64.b64encode(iv + cipher.encrypt(txt))
 
 
@@ -383,7 +383,7 @@ def decrypt(enc, key):
     key = pad(key)
     enc = base64.b64decode(enc)
     iv = enc[:16]
-    cipher = AES.new(key, AES.MODE_CBC, iv)
+    cipher = AES.new(key.encode("utf8"), AES.MODE_CBC, iv)
     return unpad(cipher.decrypt(enc[16:]))
 
 
@@ -394,4 +394,4 @@ def encrypt_tuple(txt, key):
 
 def decrypt_tuple(txt, key):
     decr = decrypt(txt, key)
-    return literal_eval(decr)
+    return ast.literal_eval(decr.decode())

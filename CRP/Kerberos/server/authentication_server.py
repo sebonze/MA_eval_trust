@@ -37,12 +37,13 @@ class AuthenticationServer(server.ResponseServer):
                      })
 
         # Begin the response
-        self.send_response(200)
+        self.send_response(200, message=None)
+        #self.send_header('Content-type', 'text/html')
         self.end_headers()
         username = form['username'].value
         password = form['password'].value
         result = db.configure_user(username, password)
-        self.wfile.write('Response: {}'.format(result))
+        self.wfile.write('Response: {}'.format(result).encode("utf8"))
         return
 
 

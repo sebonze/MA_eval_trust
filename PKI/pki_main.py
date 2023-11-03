@@ -1,6 +1,7 @@
 import os
 import subprocess
 
+
 class PKI:
     def __init__(self):
         self.certificates_dir = "./certificates"
@@ -34,6 +35,7 @@ class PKI:
     def ocsp_response(self):
         # Placeholder: Implement OCSP response
         pass
+
 
 if __name__ == "__main__":
     pki = PKI()

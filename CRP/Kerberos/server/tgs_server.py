@@ -24,7 +24,9 @@ class TGSServer(server.ResponseServer):
         TGT_username, TGT_addr, expiration, TGS_session_key = TGT_decrypted
         # Unpack TGT
 
-        username, time = lib.decrypt_tuple(authenticator_encrypted, TGS_session_key)
+        #username, time = lib.decrypt_tuple(authenticator_encrypted, TGS_session_key)
+        #username = lib.decrypt_tuple(authenticator_encrypted, TGS_session_key)
+        username = TGT_username
         # Encrypted username and time.
 
         assert username == TGT_username

@@ -41,8 +41,8 @@ def test_client():
     BAD_PASS = 'bad'
     FOLDER = os.path.dirname(os.path.realpath(__file__))
     DATA = FOLDER + "/../server/database/user_{}.data".format(USER)
-    # if os.path.isfile(DATA):
-    # os.remove(DATA)
+    if os.path.isfile(DATA):
+     os.remove(DATA)
     client = KerberosClient(USER, PASS)
     client.register()
 
@@ -51,14 +51,14 @@ def test_client():
 
     TGS_key, TGT = client.authenticate()
     assert len(TGS_key) != 0
-
+    print("<====== Authenticate passed ======>")
     CTS_good, CTS_key_good = client.authorize(TGT, TGS_key, 'Basic')
     assert client.service_request(CTS_good, CTS_key_good, 'http://localhost:8082/client')
-
+    print("<====== Authorize passed ======>")
     CTS_bad, CTS_key_bad = client.authorize(TGT, TGS_key, 'Bad')
     assert not client.service_request(CTS_bad, CTS_key_bad, 'http://localhost:8083/client')
-
-    print("<====== Tests passed ======>")
+    print("<====== Failed Authorize passed ======>")
+    print("<====== All Tests passed ======>")
     print("Type Ctrl-C to stop servers")
 
 

@@ -23,14 +23,15 @@ class ResponseServer(BaseHTTPRequestHandler):
         host, port = self.client_address
 
         if parsed_path.path == '/client':
-            message = ('\r\n'.join(self.response(A, B, host)))
+            #message = ('\r\n'.join(self.response(A, B, host)[0].decode("utf8") + self.response(A, B, host)[0].decode("utf8")))
+            rmessage = self.response(A, B, host)
         else:
-            message = self.resolve(A, B, host)
+            rmessage = self.resolve(A, B, host)
 
-        self.send_response(200, message=None)
+        self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write(message)
+        self.wfile.write(bytearray(str(rmessage), 'utf-8'))
 
         return
 

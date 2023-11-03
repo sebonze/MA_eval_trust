@@ -3,6 +3,7 @@ import sys
 
 sys.path.append('CRP/Kerberos/lib')
 import CRP.Kerberos.lib.lib as lib
+import urllib3
 import urllib
 import getpass
 import ast
@@ -20,6 +21,7 @@ PORTS = {
 
 def send(args, url):
     mapped = dict((i, args[i]) for i in range(len(args)))
+    #encoded = urllib3.util.parse_url(mapped)
     encoded = urllib.parse.urlencode(mapped)
     return requests.get(url + '?' + encoded).content
 
@@ -34,7 +36,11 @@ class KerberosClient():
         return requests.post(URL_AS, data=args)
 
     def authenticate(self):
-        TGS_key_encoded, TGT = send((self.user, '_'), URL_AS).split()
+        auth_send = send((self.user, '_'), URL_AS).split()
+        #dirty fix
+        TGS_key_encoded = auth_send[0][3:91]
+        TGT = auth_send[1][2:154]
+        #TGS_key_encoded, TGT = send((self.user, '_'), URL_AS).split()
 
         secret = lib.one_way_hash(self.passwd)
         TGS_key = lib.decrypt(TGS_key_encoded, secret)
