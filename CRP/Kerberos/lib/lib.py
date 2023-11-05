@@ -377,6 +377,18 @@ def encrypt(txt, key):
 
 
 def decrypt(enc, key):
+    try:
+        if chr(enc[0]) == "b" and chr(enc[1]) == "'" and chr(enc[len(enc)-1]) == ")" and chr(enc[len(enc)-2]) == "'":
+            enc = enc[2:90]
+    except:
+        print("debug 1")
+
+    try:
+        if enc[0] == "(" and enc[1] == "b" and enc[len(enc)-1] == "," and enc[len(enc)-2] == '\'':
+            enc = enc[3:155]
+    except:
+        print("debug 2")
+
     key = str(key)
     key = one_way_hash(key)
     key = str(key)
@@ -384,7 +396,11 @@ def decrypt(enc, key):
     enc = base64.b64decode(enc)
     iv = enc[:16]
     cipher = AES.new(key.encode("utf8"), AES.MODE_CBC, iv)
-    return unpad(cipher.decrypt(enc[16:]))
+    dec = cipher.decrypt(enc[16:])
+    if unpad(dec) == b'':
+        print("debug 4")
+        return dec
+    return unpad(dec)
 
 
 def encrypt_tuple(txt, key):
@@ -394,4 +410,13 @@ def encrypt_tuple(txt, key):
 
 def decrypt_tuple(txt, key):
     decr = decrypt(txt, key)
-    return ast.literal_eval(decr.decode())
+    try:
+        return ast.literal_eval(decr.decode())
+    except:
+        print("debug 3")
+
+    try:
+        return ast.literal_eval(decr)
+    except:
+        print("debug 5")
+    return decr

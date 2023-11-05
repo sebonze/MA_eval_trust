@@ -24,7 +24,7 @@ class SSServerBasic(server.ResponseServer):
         confirmation = lib.encrypt(timestamp, SS_session_key)
         # send the user's timestamp back to them as a confirmation of login
 
-        return (confirmation,)
+        return confirmation
 
     def resolve(self, CTS_encrypted, message, addr):
         CTS = literal_eval(lib.decrypt(CTS_encrypted, self.private_key))
