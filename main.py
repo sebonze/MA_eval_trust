@@ -27,17 +27,17 @@ def measure_cycles(func):
 @measure_cycles
 def call_schnorr():
     # Placeholder for schnorr_main callable function
-    schnorr_main.callable_function()
+    measure_cycles(schnorr_main.callable_function())
 
 @measure_cycles
 def call_pki():
     # Placeholder for pki_main callable function
-    pki_main.callable_function()
+    measure_cycles(pki_main.callable_function())
 
 @measure_cycles
 def call_kerberos():
     # Placeholder for kerberos_main callable function
-    kerberos_main.callable_function()
+    measure_cycles(kerberos_main.callable_function())
 
 if __name__ == "__main__":
     prepare_trust_solutions()
