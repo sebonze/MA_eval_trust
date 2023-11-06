@@ -48,10 +48,11 @@ class KerberosClient():
         return TGS_key, TGT
 
     def authorize(self, TGT, TGS_key, service_id):
-        unencrypted = str((TGT, service_id))
+        unencrypted = str((TGT.decode(), service_id))
         encrypted = lib.encrypt_tuple((self.user, time()), TGS_key)
 
-        CTS, CTS_key_encrypted = send((unencrypted, encrypted), URL_TGS).split()
+        tgs_response = send((unencrypted, encrypted), URL_TGS)
+        CTS, CTS_key_encrypted = tgs_response.split()
         CTS_key = lib.decrypt(CTS_key_encrypted, TGS_key)
 
         return CTS, CTS_key
@@ -63,7 +64,7 @@ class KerberosClient():
         timestamp_encrypted = send((CTS, authenticator_encrypted), url).split()[0]
         timestamp = lib.decrypt(timestamp_encrypted, CTS_key)
 
-        return timestamp == authenticator[1]
+        return timestamp.decode('utf-8') == authenticator[1]
 
     def run(self):
         print("Starting authentication")

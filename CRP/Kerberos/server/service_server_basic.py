@@ -21,10 +21,10 @@ class SSServerBasic(server.ResponseServer):
         ID, timestamp = lib.decrypt_tuple(authenticator_encrypted, SS_session_key)
         # unpack authenticator
 
-        confirmation = lib.encrypt(timestamp, SS_session_key)
+        confirmation = lib.encrypt(timestamp, SS_session_key.encode('utf-8'))
         # send the user's timestamp back to them as a confirmation of login
 
-        return confirmation
+        return confirmation.decode('utf-8')
 
     def resolve(self, CTS_encrypted, message, addr):
         CTS = literal_eval(lib.decrypt(CTS_encrypted, self.private_key))

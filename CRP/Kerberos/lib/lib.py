@@ -14,7 +14,7 @@ from Crypto.Cipher import AES
 import hashlib
 import urllib
 import os
-import ast
+from ast import literal_eval
 
 
 def egcd(a, b):
@@ -366,7 +366,12 @@ def one_way_hash(value):
 
 def encrypt(txt, key):
     txt = str(txt)
-    key = str(key)
+
+    try:
+        key = key.decode("utf8")
+    except:
+        key = str(key)
+
     key = one_way_hash(key)
     key = str(key)
     txt = pad(txt).encode("utf8")
@@ -384,12 +389,28 @@ def decrypt(enc, key):
         print("debug 1")
 
     try:
+        if chr(enc[0]) == "(" and chr(enc[1]) == "b" and chr(enc[len(enc)-1]) == ")" and chr(enc[len(enc)-2]) == ",":
+            enc = enc[3:47]
+    except:
+        print("debug 7")
+
+    try:
         if enc[0] == "(" and enc[1] == "b" and enc[len(enc)-1] == "," and enc[len(enc)-2] == '\'':
             enc = enc[3:155]
     except:
         print("debug 2")
 
-    key = str(key)
+
+
+    try:
+        key = key.decode("utf8")
+    except:
+        key = str(key)
+    #try:
+    #    if key[0] == "b" and key[1] == '\'' and key[len(key)-1] == '\'':
+    #        key = key[2:38]
+    #except:
+    #    print("debug 6")
     key = one_way_hash(key)
     key = str(key)
     key = pad(key)
@@ -411,12 +432,12 @@ def encrypt_tuple(txt, key):
 def decrypt_tuple(txt, key):
     decr = decrypt(txt, key)
     try:
-        return ast.literal_eval(decr.decode())
+        return literal_eval(decr.decode())
     except:
         print("debug 3")
 
     try:
-        return ast.literal_eval(decr)
+        return literal_eval(decr)
     except:
         print("debug 5")
     return decr

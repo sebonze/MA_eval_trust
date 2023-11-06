@@ -24,7 +24,7 @@ class TGSServer(server.ResponseServer):
         TGT_username, TGT_addr, expiration, TGS_session_key = TGT_decrypted
         # Unpack TGT
 
-        username, time = lib.decrypt_tuple(authenticator_encrypted, TGS_session_key)
+        username, time = lib.decrypt_tuple(authenticator_encrypted, TGS_session_key.encode('utf-8'))
         #username = lib.decrypt_tuple(authenticator_encrypted, TGS_session_key)
         #username = TGT_username
         # Encrypted username and time.
@@ -42,7 +42,7 @@ class TGSServer(server.ResponseServer):
         # Client-to-server ticket
 
         SS_session_key_encrypted = lib.encrypt(SS_session_key, TGS_session_key)
-        return CTS_encrypted, SS_session_key_encrypted
+        return CTS_encrypted.decode('utf-8'), SS_session_key_encrypted.decode('utf-8')
 
 
 if __name__ == '__main__':
