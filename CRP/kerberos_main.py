@@ -27,24 +27,25 @@ def SSBad():
     server.start(SSServerBad, 'Bad', 'localhost', 8083)
 
 
+PROCS = []
+
+
 def start_all():
     k_servers = [AS,
                  TGS,
                  SSBasic,
                  SSBad]
 
-    procs = []
     for k_server in k_servers:
         proc = Process(target=k_server)
         proc.start()
-        procs.append(proc)
+        PROCS.append(proc)
 
-    #for proc in procs:
+    # for proc in procs:
     #    proc.join()
 
 
-if __name__ == "__main__":
-
+def kerberos_performance_routine():
     start_all()
 
     print("-------- All Kerberos Server started --------")
@@ -62,7 +63,7 @@ if __name__ == "__main__":
     client.register()
 
     print("-------- Kerberos preparation done --------")
-    #Return the value (in fractional seconds) of a performance counter,
+    # Return the value (in fractional seconds) of a performance counter,
     # i.e. a clock with the highest available resolution to measure a short duration.
     start_time = time.perf_counter_ns()
 
@@ -72,6 +73,13 @@ if __name__ == "__main__":
 
     end_time = time.perf_counter_ns()
     cycles = end_time - start_time
-    print(f"Kerberos took {cycles} seconds.")
-
+    print(f"Kerberos took {cycles} ")
+    # return info for better table show off
     print("-------- Kerberos Authorization & Client Request done --------")
+
+    for proc in PROCS:
+        proc.kill()
+
+
+if __name__ == "__main__":
+    kerberos_performance_routine()
