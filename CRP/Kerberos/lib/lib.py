@@ -1,28 +1,23 @@
-import random
 import os.path
 from math import gcd
 from math import ceil, sqrt
-from itertools import count
 from random import getrandbits
 from random import randint
 import itertools
 import functools
-import sys
-
 import base64
 from Crypto.Cipher import AES
 import hashlib
-import urllib
 import os
 from ast import literal_eval
 
 
 def egcd(a, b):
     if a == 0:
-        return (b, 0, 1)
+        return b, 0, 1
     else:
         g, y, x = egcd(b % a, a)
-    return (g, x - (b // a) * y, y)
+    return g, x - (b // a) * y, y
 
 
 def modinv(a, m):
@@ -386,19 +381,22 @@ def decrypt(enc, key):
         if chr(enc[0]) == "b" and chr(enc[1]) == "'" and chr(enc[len(enc)-1]) == ")" and chr(enc[len(enc)-2]) == "'":
             enc = enc[2:90]
     except:
-        print("debug 1")
+        #print("debug 1")
+        pass
 
     try:
         if chr(enc[0]) == "(" and chr(enc[1]) == "b" and chr(enc[len(enc)-1]) == ")" and chr(enc[len(enc)-2]) == ",":
             enc = enc[3:47]
     except:
-        print("debug 7")
+        #print("debug 7")
+        pass
 
     try:
         if enc[0] == "(" and enc[1] == "b" and enc[len(enc)-1] == "," and enc[len(enc)-2] == '\'':
             enc = enc[3:155]
     except:
-        print("debug 2")
+        #print("debug 2")
+        pass
 
 
 
@@ -419,7 +417,7 @@ def decrypt(enc, key):
     cipher = AES.new(key.encode("utf8"), AES.MODE_CBC, iv)
     dec = cipher.decrypt(enc[16:])
     if unpad(dec) == b'':
-        print("debug 4")
+        #print("debug 4")
         return dec
     return unpad(dec)
 
@@ -434,10 +432,12 @@ def decrypt_tuple(txt, key):
     try:
         return literal_eval(decr.decode())
     except:
-        print("debug 3")
+        #print("debug 3")
+        pass
 
     try:
         return literal_eval(decr)
     except:
-        print("debug 5")
+        #print("debug 5")
+        pass
     return decr

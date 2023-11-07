@@ -36,8 +36,7 @@ class SSServerBasic(server.ResponseServer):
 
     def process_msg(self, message, user):
         print('received {} from {}'.format(message, user))
-        with open('{}/response.txt'.format(FOLDER)) as reader:
-            return reader.read()
+        return 'received {} from {}'.format(message, user)
 
 
 if __name__ == '__main__':
