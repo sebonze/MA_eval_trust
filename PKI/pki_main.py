@@ -3,8 +3,7 @@ import subprocess
 import time
 
 
-if __name__ == "__main__":
-
+def pki_performance_routine():
     print("-------- PKI preparation done --------")
     # Return the value (in fractional seconds) of a performance counter,
     # i.e. a clock with the highest available resolution to measure a short duration.
@@ -15,3 +14,6 @@ if __name__ == "__main__":
     print(f"PKI took {cycles} seconds.")
 
     print("-------- PKI Authorization & Client Request done --------")
+
+if __name__ == "__main__":
+    pki_performance_routine()
