@@ -4,8 +4,8 @@ import os
 import CRP.Kerberos.lib.lib as lib
 import CRP.Kerberos.server.key_distribution as db
 import CRP.Kerberos.server.server as server
-from CRP.Kerberos.server.authentication_server import AuthenticationServer
-from CRP.Kerberos.server.tgs_server import TGSServer
+from CRP.Kerberos.server.server_authentication import AuthenticationServer
+from CRP.Kerberos.server.server_tgs import TGSServer
 from CRP.Kerberos.server.service_server_basic import SSServerBasic
 from CRP.Kerberos.server.service_server_bad import SSServerBad
 from CRP.Kerberos.client.client import KerberosClient

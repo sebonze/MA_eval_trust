@@ -1,83 +1,42 @@
 import os
 import hashlib
 import ecdsa
+import time
+from ZKP.Schnorr import schnorr_test
+from ZKP.Schnorr.schnorr_test import pubkey_gen
+from ZKP.Schnorr.schnorr_test import schnorr_sign
+from ZKP.Schnorr.schnorr_test import schnorr_verify
 
-# Define the elliptic curve used for the Schnorr protocol
-curve = ecdsa.SECP256k1
+def schnorr_performance_routine():
 
+    seckey1_hex = "B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEF"
+    seckey2_hex = "B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEE"
+    pubkey_hex = "DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659"
+    pubkey2_hex = pubkey_gen(bytes.fromhex(seckey2_hex))
+    aux_rand_hex = "0000000000000000000000000000000000000000000000000000000000000001"
+    msg_hex = "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89"
+    sig_hex = "0E12B8C520948A776753A96F21ABD7FDC2D7D0C0DDC90851BE17B04E75EF86A47EF0DA46C4DC4D0D1BCB8668C2CE16C54C7C23A6716EDE303AF86774917CF928"
 
-def generate_keys():
-    """
-    Generate a pair of private and public keys using the defined elliptic curve.
+    msg = bytes.fromhex(msg_hex)
+    sig = bytes.fromhex(sig_hex)
+    seckey = bytes.fromhex(seckey1_hex)
+    pubkey = bytes.fromhex(pubkey_hex)
+    aux_rand = bytes.fromhex(aux_rand_hex)
 
-    Returns:
-        private_key (ecdsa.SigningKey): The private key.
-        public_key (ecdsa.VerifyingKey): The corresponding public key.
-    """
-    private_key = ecdsa.SigningKey.generate(curve=curve)
-    public_key = private_key.get_verifying_key()
-    return private_key, public_key
+    print("-------- Schnorr preparation done --------")
 
+    #Return the value (in fractional seconds) of a performance counter,
+    # i.e. a clock with the highest available resolution to measure a short duration.
+    start_time = time.perf_counter_ns()
 
-def schnorr_sign(private_key, message):
-    """
-    Sign a given message using the Schnorr signature scheme.
+    sig_actual = schnorr_sign(msg, seckey, aux_rand)
+    assert schnorr_verify(msg, pubkey, sig_actual)
 
-    Args:
-        private_key (ecdsa.SigningKey): The signer's private key.
-        message (bytes): The message to be signed.
+    end_time = time.perf_counter_ns()
+    cycles = end_time - start_time
+    print(f"Schnorr took {cycles} ")
 
-    Returns:
-        tuple: The Schnorr signature (R, s).
-    """
-    # Generate a random nonce k
-    k = ecdsa.util.randrange(curve.order)
-    R = k * curve.generator
-    R_x = int.from_bytes(R.x().to_bytes(32, 'big'), 'big')
+    print("-------- Schnorr Authorization & Client Request done --------")
 
-    # Compute the challenge e using the hash of (R, public_key, message)
-    e = int(hashlib.sha256(R_x.to_bytes(32, 'big') + private_key.get_verifying_key().to_string() + message).hexdigest(),
-            16)
-
-    # Compute the response s
-    s = (k - e * private_key.privkey.secret_multiplier) % curve.order
-    return (R, s)
-
-
-def schnorr_verify(public_key, message, signature):
-    """
-    Verify a Schnorr signature for a given message.
-
-    Args:
-        public_key (ecdsa.VerifyingKey): The signer's public key.
-        message (bytes): The signed message.
-        signature (tuple): The Schnorr signature (R, s) to be verified.
-
-    Returns:
-        bool: True if the signature is valid, False otherwise.
-    """
-    R, s = signature
-
-    # Compute the challenge e using the hash of (R, public_key, message)
-    e = int(hashlib.sha256(R.x().to_bytes(32, 'big') + public_key.to_string() + message).hexdigest(), 16)
-
-    # Verify the signature using the computed challenge
-    expected_R = s * curve.generator + e * ecdsa.ellipticcurve.Point(curve.curve, public_key.pubkey.point.x(),
-                                                                     public_key.pubkey.point.y(), curve.order)
-    return expected_R == R
-
-
-def schnorr_protocol_example():
-    """
-    Demonstrate the Schnorr signature scheme by generating keys, signing a message, and verifying the signature.
-    """
-    private_key, public_key = generate_keys()
-    message = b"test hallo 123123"
-    signature = schnorr_sign(private_key, message)
-    valid = schnorr_verify(public_key, message, signature)
-    print(f"Signature is {'valid' if valid else 'invalid'}")
-
-
-schnorr_protocol_example()
-
-
+if __name__ == "__main__":
+    schnorr_performance_routine()
