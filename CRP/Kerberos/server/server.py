@@ -45,5 +45,5 @@ def start(response_server, name, url, port):
         response_server(private, *args)
 
     server = HTTPServer((url, port), handler)
-    print("started server on {}:{}".format(url, port))
+    #print("started server on {}:{}".format(url, port))
     server.serve_forever()

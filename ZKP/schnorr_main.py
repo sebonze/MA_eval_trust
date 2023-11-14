@@ -9,6 +9,7 @@ from ZKP.Schnorr.schnorr_test import schnorr_verify
 
 def schnorr_performance_routine():
 
+    start_time = time.perf_counter_ns()
     seckey1_hex = "B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEF"
     seckey2_hex = "B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEE"
     pubkey_hex = "DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659"
@@ -23,6 +24,8 @@ def schnorr_performance_routine():
     pubkey = bytes.fromhex(pubkey_hex)
     aux_rand = bytes.fromhex(aux_rand_hex)
 
+    print(f" {time.perf_counter_ns()- start_time} ")
+
     print("-------- Schnorr preparation done --------")
 
     #Return the value (in fractional seconds) of a performance counter,
@@ -30,11 +33,12 @@ def schnorr_performance_routine():
     start_time = time.perf_counter_ns()
 
     sig_actual = schnorr_sign(msg, seckey, aux_rand)
+    print(f" {time.perf_counter_ns()- start_time} ")
+    start_time = time.perf_counter_ns()
+
     assert schnorr_verify(msg, pubkey, sig_actual)
 
-    end_time = time.perf_counter_ns()
-    cycles = end_time - start_time
-    print(f"Schnorr took {cycles} ")
+    print(f" {time.perf_counter_ns()- start_time} ")
 
     print("-------- Schnorr Authorization & Client Request done --------")
 

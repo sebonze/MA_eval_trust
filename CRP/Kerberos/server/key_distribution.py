@@ -10,7 +10,7 @@ SS_NAME = "SS"
 
 def save(ID, value):
     f = open("{}/{}.data".format(FOLDER, ID), 'w+')
-    print("saving {}:{}".format(ID, value))
+    #print("saving {}:{}".format(ID, value))
     f.write(str(value))
     f.close()
 

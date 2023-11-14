@@ -61,18 +61,23 @@ def kerberos_performance_routine():
     client = KerberosClient(USER, PASS)
     client.register()
 
+    client.run()
+
     print("-------- Kerberos preparation done --------")
     # Return the value (in fractional seconds) of a performance counter,
     # i.e. a clock with the highest available resolution to measure a short duration.
     start_time = time.perf_counter_ns()
 
     TGS_key, TGT = client.authenticate()
-    CTS_good, CTS_key_good = client.authorize(TGT, TGS_key, 'Basic')
-    assert client.service_request(CTS_good, CTS_key_good, 'http://localhost:8082/client')
+    print(f" {time.perf_counter_ns()- start_time} ")
+    start_time = time.perf_counter_ns()
 
-    end_time = time.perf_counter_ns()
-    cycles = end_time - start_time
-    print(f"Kerberos took {cycles} ")
+    CTS_good, CTS_key_good = client.authorize(TGT, TGS_key, 'Basic')
+    print(f" {time.perf_counter_ns()- start_time} ")
+    start_time = time.perf_counter_ns()
+
+    assert client.service_request(CTS_good, CTS_key_good, 'http://localhost:8082/client')
+    print(f" {time.perf_counter_ns()- start_time} ")
     # return info for better table show off
     print("-------- Kerberos Authorization & Client Request done --------")
 

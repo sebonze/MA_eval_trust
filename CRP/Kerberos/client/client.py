@@ -3,10 +3,8 @@ import sys
 
 sys.path.append('CRP/Kerberos/lib')
 import CRP.Kerberos.lib.lib as lib
-import urllib3
 import urllib
 import getpass
-import ast
 from time import time
 
 URL_AS = 'http://localhost:8080/client'
@@ -21,7 +19,6 @@ PORTS = {
 
 def send(args, url):
     mapped = dict((i, args[i]) for i in range(len(args)))
-    #encoded = urllib3.util.parse_url(mapped)
     encoded = urllib.parse.urlencode(mapped)
     return requests.get(url + '?' + encoded).content
 

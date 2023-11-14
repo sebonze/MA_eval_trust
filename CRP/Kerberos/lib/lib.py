@@ -301,7 +301,6 @@ def add(p1, p2, m, p):
     for i in range(len(p1)):
         result[i] += (p1[i] + p2[i])
         result[i] %= p
-    print(result)
     return reducer(result, m, p)
 
 

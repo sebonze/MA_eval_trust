@@ -27,7 +27,6 @@ class AuthenticationServer(server.ResponseServer):
 
     # Handler for the GET requests
     def do_POST(self):
-        print("DEBUG TRIGGERED GET REQUEST")
         # Parse the form data posted
         form = cgi.FieldStorage(
             fp=self.rfile,

@@ -27,7 +27,7 @@ class SSServerBasic(server.ResponseServer):
         return confirmation.decode('utf-8')
 
     def resolve(self, CTS_encrypted, message, addr):
-        CTS = literal_eval(lib.decrypt(CTS_encrypted, self.private_key))
+        CTS = literal_eval(lib.decrypt(CTS_encrypted, self.private_key).decode('utf-8'))
         if CTS[1] != addr:
             return 'IP does not match ticket'
         if CTS[2] < time():
@@ -35,7 +35,7 @@ class SSServerBasic(server.ResponseServer):
         return self.process_msg(message, CTS[0])
 
     def process_msg(self, message, user):
-        print('received {} from {}'.format(message, user))
+        #print('received {} from {}'.format(message, user))
         return 'received {} from {}'.format(message, user)
 
 
