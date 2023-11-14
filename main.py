@@ -21,8 +21,7 @@ def call_schnorr():
 
 def call_pki():
     # Placeholder for pki_main callable function
-    #pki_main.main()
-    pass
+    pki_main.pki_performance_routine()
 
 def call_kerberos():
     # Placeholder for kerberos_main callable function

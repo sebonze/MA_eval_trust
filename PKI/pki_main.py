@@ -1,7 +1,7 @@
 import os
 import subprocess
 import time
-
+import PKI.demo_pki as demo_pki
 
 def pki_performance_routine():
     print("-------- PKI preparation done --------")
@@ -9,9 +9,9 @@ def pki_performance_routine():
     # i.e. a clock with the highest available resolution to measure a short duration.
     start_time = time.perf_counter_ns()
 
-    end_time = time.perf_counter_ns()
-    cycles = end_time - start_time
-    print(f"PKI took {cycles} seconds.")
+    demo_pki.pki_routine()
+
+    print(f" {time.perf_counter_ns()- start_time} ")
 
     print("-------- PKI Authorization & Client Request done --------")
 

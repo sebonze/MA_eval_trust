@@ -1,7 +1,7 @@
 import socket
 import time
 from base64 import b64encode
-from crc import CrcCalculator, Crc32
+#from crc import CrcCalculator, Crc32
 from datetime import datetime
 from filelogger import FileLogger
 from queue import Queue

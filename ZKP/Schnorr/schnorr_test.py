@@ -159,7 +159,8 @@ aux_rand = bytes.fromhex(aux_rand_hex)
 sig_actual = schnorr_sign(msg, seckey, aux_rand)
 
 if sig == sig_actual:
-    print(' * Passed signing test.')
+    #print(' * Passed signing test.')
+    pass
 else:
     print(' * Failed signing test.')
     print('   Expected signature:', sig.hex().upper())

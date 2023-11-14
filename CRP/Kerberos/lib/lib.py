@@ -108,7 +108,8 @@ def miller_rabin_test(n, k):
             t += 1
             m = q
         except:
-            print("{} {} {} {} {}".format(q, r, t, m, n))
+            #print("{} {} {} {} {}".format(q, r, t, m, n))
+            pass
 
     # x = a^d mod n
     # n-1 = 2^r * d
