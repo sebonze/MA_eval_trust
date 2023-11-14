@@ -1,7 +1,6 @@
 from multiprocessing import Process
 import time
 import os
-import CRP.Kerberos.lib.lib as lib
 import CRP.Kerberos.server.key_distribution as db
 import CRP.Kerberos.server.server as server
 from CRP.Kerberos.server.server_authentication import AuthenticationServer
