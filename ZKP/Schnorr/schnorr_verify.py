@@ -1,6 +1,6 @@
 import argparse, sys
 from utils import print_fails, print_success
-from schnorr_lib import schnorr_verify, sha256
+from schnorr_lib import schnorr_verify, sha384
 
 
 def main():
@@ -16,7 +16,7 @@ def main():
     sig = args.signature
     
     try: 
-        msg_bytes = sha256(msg.encode())
+        msg_bytes = sha384(msg.encode())
         sig_bytes = bytes.fromhex(sig)
         pubkey_bytes = bytes.fromhex(pubkey)
 

@@ -1,40 +1,47 @@
-import os
-import hashlib
-import ecdsa
+
+import sys
 import time
-from ZKP.Schnorr import schnorr_test
 from ZKP.Schnorr.schnorr_test import pubkey_gen
 from ZKP.Schnorr.schnorr_test import schnorr_sign
 from ZKP.Schnorr.schnorr_test import schnorr_verify
 import statistics
 
 
-def schnorr_performance_routine(c_init=10):
+def schnorr_performance_routine(c_init=1):
 
     schnorr_data = []
+    sig_actual = None
 
-    seckey1_hex = "B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEF"
-    seckey2_hex = "B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEE"
+    start_time = time.perf_counter_ns()
+
+    sec_key1_hex = "B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEF"
     pubkey_hex = "DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659"
-    pubkey2_hex = pubkey_gen(bytes.fromhex(seckey2_hex))
     aux_rand_hex = "0000000000000000000000000000000000000000000000000000000000000001"
     msg_hex = "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89"
-    sig_hex = "0E12B8C520948A776753A96F21ABD7FDC2D7D0C0DDC90851BE17B04E75EF86A47EF0DA46C4DC4D0D1BCB8668C2CE16C54C7C23A6716EDE303AF86774917CF928"
     msg = bytes.fromhex(msg_hex)
-    sig = bytes.fromhex(sig_hex)
-    seckey = bytes.fromhex(seckey1_hex)
+    sec_key = bytes.fromhex(sec_key1_hex)
     pubkey = bytes.fromhex(pubkey_hex)
     aux_rand = bytes.fromhex(aux_rand_hex)
+
+    schnorr_time_prep = time.perf_counter_ns() - start_time
 
     for c in range(c_init):
         start_time = time.perf_counter_ns()
 
-        sig_actual = schnorr_sign(msg, seckey, aux_rand)
+        sig_actual = schnorr_sign(msg, sec_key, aux_rand)
+
         assert schnorr_verify(msg, pubkey, sig_actual)
 
         schnorr_data.append(time.perf_counter_ns() - start_time)
 
-    return min(schnorr_data), max(schnorr_data), statistics.mean(schnorr_data)
+    print(sys.getsizeof(sig_actual))
+    print(sys.getsizeof(msg))
+    print(sys.getsizeof(sec_key))
+    print(sys.getsizeof(aux_rand))
+
+    return min(schnorr_data), max(schnorr_data), statistics.mean(schnorr_data), schnorr_time_prep
+
+
 
 
 if __name__ == "__main__":

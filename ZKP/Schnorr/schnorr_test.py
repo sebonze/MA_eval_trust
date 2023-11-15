@@ -10,8 +10,8 @@ G = (0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798,
 Point = Tuple[int, int]
 
 def tagged_hash(tag: str, msg: bytes) -> bytes:
-    tag_hash = hashlib.sha256(tag.encode()).digest()
-    return hashlib.sha256(tag_hash + tag_hash + msg).digest()
+    tag_hash = hashlib.sha384(tag.encode()).digest()
+    return hashlib.sha384(tag_hash + tag_hash + msg).digest()
 
 def is_infinity(P: Optional[Point]) -> bool:
     return P is None
@@ -73,8 +73,8 @@ def lift_x_even_y(b: bytes) -> Optional[Point]:
 def int_from_bytes(b: bytes) -> int:
     return int.from_bytes(b, byteorder="big")
 
-def hash_sha256(b: bytes) -> bytes:
-    return hashlib.sha256(b).digest()
+def hash_sha384(b: bytes) -> bytes:
+    return hashlib.sha384(b).digest()
 
 def is_square(x: int) -> bool:
     return int(pow(x, (p - 1) // 2, p)) == 1
@@ -138,33 +138,32 @@ def schnorr_verify(msg: bytes, pubkey: bytes, sig: bytes) -> bool:
         return False
     return True
 
-#def order_multiset(pubkey_vec):
 
 
+if __name__ == "__main__":
+    seckey1_hex = "B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEF"
+    seckey2_hex = "B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEE"
+    pubkey_hex="DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659"
+    pubkey2_hex = pubkey_gen(bytes.fromhex(seckey2_hex))
+    aux_rand_hex="0000000000000000000000000000000000000000000000000000000000000001"
+    msg_hex="243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89"
+    sig_hex="0E12B8C520948A776753A96F21ABD7FDC2D7D0C0DDC90851BE17B04E75EF86A47EF0DA46C4DC4D0D1BCB8668C2CE16C54C7C23A6716EDE303AF86774917CF928"
 
-seckey1_hex = "B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEF"
-seckey2_hex = "B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEE"
-pubkey_hex="DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659"
-pubkey2_hex = pubkey_gen(bytes.fromhex(seckey2_hex))
-aux_rand_hex="0000000000000000000000000000000000000000000000000000000000000001"
-msg_hex="243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89"
-sig_hex="0E12B8C520948A776753A96F21ABD7FDC2D7D0C0DDC90851BE17B04E75EF86A47EF0DA46C4DC4D0D1BCB8668C2CE16C54C7C23A6716EDE303AF86774917CF928"
+    msg = bytes.fromhex(msg_hex)
+    sig = bytes.fromhex(sig_hex)
+    seckey = bytes.fromhex(seckey1_hex)
+    pubkey = bytes.fromhex(pubkey_hex)
+    aux_rand = bytes.fromhex(aux_rand_hex)
 
-msg = bytes.fromhex(msg_hex)
-sig = bytes.fromhex(sig_hex)
-seckey = bytes.fromhex(seckey1_hex)
-pubkey = bytes.fromhex(pubkey_hex)
-aux_rand = bytes.fromhex(aux_rand_hex)
+    sig_actual = schnorr_sign(msg, seckey, aux_rand)
 
-sig_actual = schnorr_sign(msg, seckey, aux_rand)
-
-if sig == sig_actual:
-    #print(' * Passed signing test.')
-    pass
-else:
-    print(' * Failed signing test.')
-    print('   Expected signature:', sig.hex().upper())
-    print('   Actual signature:', sig_actual.hex().upper())
+    if sig == sig_actual:
+        #print(' * Passed signing test.')
+        pass
+    else:
+        print(' * Failed signing test.')
+        print('   Expected signature:', sig.hex().upper())
+        print('   Actual signature:', sig_actual.hex().upper())
 
 
 

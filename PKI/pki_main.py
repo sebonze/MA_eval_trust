@@ -4,7 +4,7 @@ import time
 import PKI.demo_pki as demo_pki
 import statistics
 
-def pki_performance_routine(c_init=10):
+def pki_performance_routine(c_init=1):
     pki_data = []
 
     for c in range(c_init):

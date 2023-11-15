@@ -1,6 +1,6 @@
 import argparse, json, sys
 from utils import print_fails
-from schnorr_lib import sha256, schnorr_sign, schnorr_musig_sign, schnorr_musig2_sign
+from schnorr_lib import sha384, schnorr_sign, schnorr_musig_sign, schnorr_musig2_sign
 
 def main():
     parser = argparse.ArgumentParser(
@@ -28,7 +28,7 @@ def main():
     # Signature
     try:
         # Get message digest
-        M = sha256(msg.encode())
+        M = sha384(msg.encode())
         X = None
         if not ( musig1 or musig2 ):
             if i < 0 or i >= len(users):

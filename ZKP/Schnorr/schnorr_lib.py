@@ -80,8 +80,8 @@ def point_mul(P: Optional[Point], d: int) -> Optional[Point]:
 # after hashing tag_hash instead of rehashing it all the time
 # Get the hash digest of (tag_hashed || tag_hashed || message)
 def tagged_hash(tag: str, msg: bytes) -> bytes:
-    tag_hash = hashlib.sha256(tag.encode()).digest()
-    return hashlib.sha256(tag_hash + tag_hash + msg).digest()
+    tag_hash = hashlib.sha384(tag.encode()).digest()
+    return hashlib.sha384(tag_hash + tag_hash + msg).digest()
 
 
 # Check if a point is at infinity
@@ -114,9 +114,9 @@ def lift_x_even_y(b: bytes) -> Optional[Point]:
         return x(P), y(P) if y(P) % 2 == 0 else p - y(P)
 
 
-# Get hash digest with SHA256
-def sha256(b: bytes) -> bytes:
-    return hashlib.sha256(b).digest()
+# Get hash digest with sha384
+def sha384(b: bytes) -> bytes:
+    return hashlib.sha384(b).digest()
 
 
 # Check if an int is square
@@ -248,7 +248,7 @@ def schnorr_musig_sign(msg: bytes, users: list) -> bytes:
     L = b''
     for u in users:
         L += pubkey_gen_from_hex(u["privateKey"])
-    L = sha256(L)
+    L = sha384(L)
 
     Rsum = None
     X = None
@@ -262,7 +262,7 @@ def schnorr_musig_sign(msg: bytes, users: list) -> bytes:
         
         # KeyAggCoef
         # ai = h(L||Pi)
-        ai = int_from_bytes(sha256(L + bytes_from_point(Pi)))
+        ai = int_from_bytes(sha384(L + bytes_from_point(Pi)))
         u["ai"] = ai
 
         # Computation of X~
@@ -324,7 +324,7 @@ def schnorr_musig2_sign(msg: bytes, users: list) -> bytes:
     L = b''
     for u in users:
         L += pubkey_gen_from_hex(u["privateKey"])
-    L = sha256(L)
+    L = sha384(L)
 
     X = None
     for u in users:
@@ -337,7 +337,7 @@ def schnorr_musig2_sign(msg: bytes, users: list) -> bytes:
 
         # KeyAggCoef
         # ai = h(L||Pi)
-        ai = int_from_bytes(sha256(L + bytes_from_point(Pi)))
+        ai = int_from_bytes(sha384(L + bytes_from_point(Pi)))
         u["ai"] = ai
 
         # Computation of X~
@@ -381,7 +381,7 @@ def schnorr_musig2_sign(msg: bytes, users: list) -> bytes:
         Rbytes += bytes_from_point(Rj)
 
     # b = h(R1 || ... || Rn || X || M)
-    b = sha256(Rbytes + bytes_from_point(X) + msg)
+    b = sha384(Rbytes + bytes_from_point(X) + msg)
 
     Rsum = None
     for j, Rj in enumerate(Rj_list):

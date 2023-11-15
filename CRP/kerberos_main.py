@@ -45,7 +45,7 @@ def start_all():
     #    proc.join()
 
 
-def kerberos_performance_routine(c_init=10):
+def kerberos_performance_routine(c_init=1):
 
     kerberos_data = []
 
@@ -70,7 +70,7 @@ def kerberos_performance_routine(c_init=10):
         #CTS_good, CTS_key_good = client.authorize(TGT, TGS_key, 'Basic')
         #assert client.service_request(CTS_good, CTS_key_good, 'http://localhost:8082/client')
 
-        kerberos_data.append(int((time.perf_counter_ns() - start_time)/10))
+        kerberos_data.append(int((time.perf_counter_ns() - start_time)))
 
     for proc in PROCS:
         proc.kill()
