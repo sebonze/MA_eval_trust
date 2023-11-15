@@ -8,6 +8,7 @@ from CRP.Kerberos.server.server_tgs import TGSServer
 from CRP.Kerberos.server.service_server_basic import SSServerBasic
 from CRP.Kerberos.server.service_server_bad import SSServerBad
 from CRP.Kerberos.client.client import KerberosClient
+import statistics
 
 
 def AS():
@@ -44,10 +45,11 @@ def start_all():
     #    proc.join()
 
 
-def kerberos_performance_routine():
-    start_all()
+def kerberos_performance_routine(c_init=10):
 
-    print("-------- All Kerberos Server started --------")
+    kerberos_data = []
+
+    start_all()
 
     USER = 'username'
     PASS = 'password'
@@ -58,34 +60,22 @@ def kerberos_performance_routine():
     if os.path.isfile(DATA):
         os.remove(DATA)
 
-    start_time = time.perf_counter_ns()
-
     client = KerberosClient(USER, PASS)
     client.register()
-    print(f" {time.perf_counter_ns() - start_time} ")
-    start_time = time.perf_counter_ns()
 
-    print("-------- Kerberos preparation done --------")
-    # Return the value (in fractional seconds) of a performance counter,
-    # i.e. a clock with the highest available resolution to measure a short duration.
+    for c in range(c_init):
+        start_time = time.perf_counter_ns()
 
-    TGS_key, TGT = client.authenticate()
-    print(f" {time.perf_counter_ns()- start_time} ")
-    start_time = time.perf_counter_ns()
+        TGS_key, TGT = client.authenticate()
+        #CTS_good, CTS_key_good = client.authorize(TGT, TGS_key, 'Basic')
+        #assert client.service_request(CTS_good, CTS_key_good, 'http://localhost:8082/client')
 
-    CTS_good, CTS_key_good = client.authorize(TGT, TGS_key, 'Basic')
-    print(f" {time.perf_counter_ns()- start_time} ")
-    start_time = time.perf_counter_ns()
-
-    assert client.service_request(CTS_good, CTS_key_good, 'http://localhost:8082/client')
-    print(f" {time.perf_counter_ns()- start_time} ")
-
-    # return info for better table show off
-    print("-------- Kerberos Authorization & Client Request done --------")
+        kerberos_data.append(int((time.perf_counter_ns() - start_time)/10))
 
     for proc in PROCS:
         proc.kill()
 
+    return min(kerberos_data), max(kerberos_data), statistics.mean(kerberos_data)
 
 if __name__ == "__main__":
     kerberos_performance_routine()

@@ -167,7 +167,7 @@ def pki_routine():
 
     # Validate the issued certificate
     is_valid = validate_certificate(entity_certificate, ca_certificate)
-    print("Certificate is valid:", is_valid)
+    #print("Certificate is valid:", is_valid)
 
     # Revoke the certificate and save CRL
     crl_pem = revoke_certificate(entity_certificate, ca_private_key, ca_certificate)
@@ -180,4 +180,4 @@ def pki_routine():
 
     # Check revocation status
     is_revoked = is_certificate_revoked(entity_certificate, crl)
-    print("Certificate is revoked:", is_revoked)
+    #print("Certificate is revoked:", is_revoked)
