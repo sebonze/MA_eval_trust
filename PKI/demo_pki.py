@@ -5,6 +5,7 @@ from cryptography.x509.oid import NameOID
 from cryptography.exceptions import InvalidSignature
 from datetime import datetime, timedelta
 import os
+import time
 
 
 # Function to generate a private key
@@ -138,36 +139,55 @@ def is_certificate_revoked(certificate, crl):
             return True
     return False
 
-def pki_routine():
+def pki_routine(c_init=10):
+    pki_prep_t = []
+    pki_sign_t = []
+    pki_verify_t = []
+
     # Directory setup
     os.makedirs("tmp_cert", exist_ok=True)
 
-    # Generate CA private key and save it
-    ca_private_key, ca_private_key_pem = generate_private_key(password="mysecurepassword")
-    with open("tmp_cert/ca_private_key.pem", "wb") as f:
-        f.write(ca_private_key_pem)
+    for c in range(c_init):
 
-    # Generate CA certificate and save it
-    ca_cert_pem = generate_ca_certificate(ca_private_key)
-    with open("tmp_cert/ca_certificate.pem", "wb") as f:
-        f.write(ca_cert_pem)
+        start_time = time.perf_counter_ns()
+        # Generate CA private key and save it
+        ca_private_key, ca_private_key_pem = generate_private_key(password="mysecurepassword")
+        with open("tmp_cert/ca_private_key.pem", "wb") as f:
+            f.write(ca_private_key_pem)
+
+        # Generate CA certificate and save it
+        ca_cert_pem = generate_ca_certificate(ca_private_key)
+        with open("tmp_cert/ca_certificate.pem", "wb") as f:
+            f.write(ca_cert_pem)
+
+        pki_prep_t.append(time.perf_counter_ns() - start_time)
 
     # Load CA private key and certificate
     ca_private_key, ca_certificate = load_ca_private_key_and_cert()
-
-    # Issue a certificate and save it
     entity_name = "entity1"
-    entity_private_key, entity_certificate_pem = issue_certificate(entity_name, ca_private_key, ca_certificate)
-    with open(f"tmp_cert/{entity_name}_certificate.pem", "wb") as f:
-        f.write(entity_certificate_pem)
+
+    for c in range(c_init):
+        start_time = time.perf_counter_ns()
+
+        # Issue a certificate and save it
+
+        entity_private_key, entity_certificate_pem = issue_certificate(entity_name, ca_private_key, ca_certificate)
+        with open(f"tmp_cert/{entity_name}_certificate.pem", "wb") as f:
+            f.write(entity_certificate_pem)
+
+        pki_sign_t.append(time.perf_counter_ns() - start_time)
 
     # Load the issued certificate
     with open(f"tmp_cert/{entity_name}_certificate.pem", "rb") as f:
         entity_certificate = x509.load_pem_x509_certificate(f.read())
 
-    # Validate the issued certificate
-    is_valid = validate_certificate(entity_certificate, ca_certificate)
-    #print("Certificate is valid:", is_valid)
+    for c in range(c_init):
+        start_time = time.perf_counter_ns()
+
+        # Validate the issued certificate
+        is_valid = validate_certificate(entity_certificate, ca_certificate)
+
+        pki_verify_t.append(time.perf_counter_ns() - start_time)
 
     # Revoke the certificate and save CRL
     crl_pem = revoke_certificate(entity_certificate, ca_private_key, ca_certificate)
@@ -181,3 +201,5 @@ def pki_routine():
     # Check revocation status
     is_revoked = is_certificate_revoked(entity_certificate, crl)
     #print("Certificate is revoked:", is_revoked)
+
+    return [pki_prep_t, pki_sign_t, pki_verify_t]

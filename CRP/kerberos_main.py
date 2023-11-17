@@ -47,7 +47,9 @@ def start_all():
 
 def kerberos_performance_routine(c_init=1):
 
-    kerberos_data = []
+    kerberos_prep_t = []
+    kerberos_sign_t = []
+    kerberos_verify_t = []
 
     start_all()
 
@@ -63,19 +65,33 @@ def kerberos_performance_routine(c_init=1):
     client = KerberosClient(USER, PASS)
     client.register()
 
-    for c in range(c_init):
-        start_time = time.perf_counter_ns()
+    TGS_key, TGT = client.authenticate()
 
-        TGS_key, TGT = client.authenticate()
-        #CTS_good, CTS_key_good = client.authorize(TGT, TGS_key, 'Basic')
-        #assert client.service_request(CTS_good, CTS_key_good, 'http://localhost:8082/client')
+    CTS_good, CTS_key_good = client.authorize(TGT, TGS_key, 'Basic')
+    assert client.service_request(CTS_good, CTS_key_good, 'http://localhost:8082/client')
 
-        kerberos_data.append(int((time.perf_counter_ns() - start_time)))
 
     for proc in PROCS:
         proc.kill()
 
-    return min(kerberos_data), max(kerberos_data), statistics.mean(kerberos_data)
+    #get data from time logs
+    # Open the file and read lines
+    with open("prep.data", 'r') as file:
+        for line in file:
+            # Convert each line to an integer and append to the array
+            kerberos_prep_t.append(int(line.strip()))
+
+    with open("sign.data", 'r') as file:
+        for line in file:
+            # Convert each line to an integer and append to the array
+            kerberos_sign_t.append(int(line.strip()))
+
+    with open("verify.data", 'r') as file:
+        for line in file:
+            # Convert each line to an integer and append to the array
+            kerberos_verify_t.append(int(line.strip()))
+
+    return [kerberos_prep_t, kerberos_sign_t, kerberos_verify_t]
 
 if __name__ == "__main__":
     kerberos_performance_routine()

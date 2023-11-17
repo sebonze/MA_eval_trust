@@ -1,40 +1,19 @@
-import time
-
 from prettytable import PrettyTable
-
-import ZKP.schnorr_main
-import PKI.pki_main
-import CRP.kerberos_main
 from CRP import kerberos_main
 from PKI import pki_main
 from ZKP import schnorr_main
-
-
-def prepare_trust_solutions():
-    """
-    This function prepares all Trust Solutions to run.
-    You can add any initialization or setup code here.
-    """
-    # Placeholder for preparation code
-    pass
-
+import statistics
 
 schnorr_crypto_info = "SECP256K1, SHA-384"
-schnorr_min = 0
-schnorr_max = 0
-schnorr_mean = 0
+schnorr_data = None
 schnorr_bytes = 0
 
 pki_crypto_info = "ECDSA P-384, SHA-384"
-pki_min = 0
-pki_max = 0
-pki_mean = 0
+pki_data = None
 pki_bytes = 0
 
 kerberos_crypto_info = "AES 256 CBC, SHA-384"
-kerberos_min = 0
-kerberos_max = 0
-kerberos_mean = 0
+kerberos_data = None
 kerberos_bytes = 0
 
 def print_data():
@@ -48,23 +27,51 @@ def print_data():
     # Add columns
     table.field_names = ["Trust Solution", "Cipher & Hash", "Min Time", "Max Time", "Mean Time", "Size (Byte)", "Latency *", "Number of Routines"]
 
-    # Add row with the provided data
-    # every trust solution offers similar internal operations: preparation (key generation & certificate gen), register / authentication, authorization, verification
-    # time to de- and encrypt and the total overall time
-    table.add_row(["Schnorr total", schnorr_crypto_info, schnorr_min, schnorr_max, schnorr_mean, "N/A", "N/A",100])
-    table.add_row(["    Schnorr Prep", schnorr_crypto_info, schnorr_time_prep, schnorr_time_prep, schnorr_time_prep, "N/A", "N/A", 100])
-    table.add_row(["PKI total", pki_crypto_info, pki_min, pki_max, pki_mean, "N/A", "N/A",100])
-    table.add_row(["Kerberos total", kerberos_crypto_info, kerberos_min, kerberos_max, kerberos_mean, "N/A", "N/A",100])
+    # Add row with the provided data every trust solution offers similar internal operations: preparation (key
+    # generation & certificate gen), register / authentication, authorization, verification time to de- and encrypt
+    # and the total overall time
+
+    st_min = min(schnorr_data[0])+min(schnorr_data[1])+min(schnorr_data[2])
+    st_max =  max(schnorr_data[0])+max(schnorr_data[1])+max(schnorr_data[2])
+    st_mean = statistics.mean(schnorr_data[0])+statistics.mean(schnorr_data[1])+statistics.mean(schnorr_data[2])
+
+    pt_min = min(pki_data[0])+min(pki_data[1])+min(pki_data[2])
+    pt_max =  max(pki_data[0])+max(pki_data[1])+max(pki_data[2])
+    pt_mean = statistics.mean(pki_data[0])+statistics.mean(pki_data[1])+statistics.mean(pki_data[2])
+
+    kt_min = min(kerberos_data[0])+min(kerberos_data[1])+min(kerberos_data[2])
+    kt_max =  max(kerberos_data[0])+max(kerberos_data[1])+max(kerberos_data[2])
+    kt_mean = statistics.mean(kerberos_data[0])+statistics.mean(kerberos_data[1])+statistics.mean(kerberos_data[2])
+
+    table.add_row(["Schnorr Prep", schnorr_crypto_info, min(schnorr_data[0]), max(schnorr_data[0]), statistics.mean(schnorr_data[0]), "N/A", "N/A", 100])
+    table.add_row(["Schnorr Sign", schnorr_crypto_info, min(schnorr_data[1]), max(schnorr_data[1]), statistics.mean(schnorr_data[1]), "N/A", "N/A", 100])
+    table.add_row(["Schnorr Verify", schnorr_crypto_info, min(schnorr_data[2]), max(schnorr_data[2]), statistics.mean(schnorr_data[2]), "N/A", "N/A", 100])
+    table.add_row(["Schnorr Total", schnorr_crypto_info, st_min, st_max, st_mean, "N/A", "N/A", 100])
+
+    table.add_row(["-----", "-----", "-----", "-----", "-----", "-----", "-----", "-----"])
+
+    table.add_row(["PKI Prep", pki_crypto_info, min(pki_data[0]), max(pki_data[0]), statistics.mean(pki_data[0]), "N/A", "N/A", 100])
+    table.add_row(["PKI Sign", pki_crypto_info, min(pki_data[1]), max(pki_data[1]), statistics.mean(pki_data[1]), "N/A", "N/A", 100])
+    table.add_row(["PKI Verify", pki_crypto_info, min(pki_data[2]), max(pki_data[2]), statistics.mean(pki_data[2]), "N/A", "N/A", 100])
+    table.add_row(["PKI Total", pki_crypto_info, pt_min, pt_max, pt_mean, "N/A", "N/A", 100])
+
+    table.add_row(["-----", "-----", "-----", "-----", "-----", "-----", "-----", "-----"])
+
+    table.add_row(["Kerberos Prep", kerberos_crypto_info, min(kerberos_data[0]), max(kerberos_data[0]), statistics.mean(kerberos_data[0]), "N/A", "N/A", 100])
+    table.add_row(["Kerberos Sign", kerberos_crypto_info, min(kerberos_data[1]), max(kerberos_data[1]), statistics.mean(kerberos_data[1]), "N/A", "N/A", 100])
+    table.add_row(["Kerberos Verify", kerberos_crypto_info, min(kerberos_data[2]), max(kerberos_data[2]), statistics.mean(kerberos_data[2]), "N/A", "N/A", 100])
+    table.add_row(["Kerberos Total", kerberos_crypto_info, kt_min, kt_max, kt_mean, "N/A", "N/A", 100])
+
 
     # Print table
     print(table)
 
 
 if __name__ == "__main__":
-    prepare_trust_solutions()
-    kerberos_min, kerberos_max, kerberos_mean = kerberos_main.kerberos_performance_routine()
-    schnorr_min, schnorr_max, schnorr_mean, schnorr_time_prep = schnorr_main.schnorr_performance_routine()
-    pki_min, pki_max, pki_mean = pki_main.pki_performance_routine()
+
+    kerberos_data = kerberos_main.kerberos_performance_routine()
+    schnorr_data = schnorr_main.schnorr_performance_routine()
+    pki_data = pki_main.pki_performance_routine()
 
 
     print_data()

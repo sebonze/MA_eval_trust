@@ -4,15 +4,9 @@ import time
 import PKI.demo_pki as demo_pki
 import statistics
 
-def pki_performance_routine(c_init=1):
-    pki_data = []
+def pki_performance_routine(c_init=10):
 
-    for c in range(c_init):
-        start_time = time.perf_counter_ns()
-        demo_pki.pki_routine()
-        pki_data.append(time.perf_counter_ns() - start_time)
-
-    return min(pki_data), max(pki_data), statistics.mean(pki_data)
+    return demo_pki.pki_routine(c_init)
 
 
 if __name__ == "__main__":

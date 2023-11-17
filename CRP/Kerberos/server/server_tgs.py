@@ -1,13 +1,11 @@
 #!/usr/bin/python
-import time
 from ast import literal_eval
 import CRP.Kerberos.server.key_distribution as db
 import uuid
 import CRP.Kerberos.server.server as server
-
 import sys
+import time
 
-sys.path.append('CRP/Kerberos/lib')
 import CRP.Kerberos.lib.lib as lib
 
 SERVER = 'localhost'
@@ -16,7 +14,10 @@ TIMEOUT = 60 * 60  # An hour
 
 
 class TGSServer(server.ResponseServer):
+
     def response(self, TGT_ID, authenticator_encrypted, addr):
+        start_time = time.perf_counter_ns()
+
         TGT, service_id = literal_eval(TGT_ID)
         # Unencrypted TGT and service id come as string'd double
 
@@ -24,10 +25,9 @@ class TGSServer(server.ResponseServer):
         TGT_username, TGT_addr, expiration, TGS_session_key = TGT_decrypted
         # Unpack TGT
 
-        username, time = lib.decrypt_tuple(authenticator_encrypted, TGS_session_key.encode('utf-8'))
-        #username = lib.decrypt_tuple(authenticator_encrypted, TGS_session_key)
-        #username = TGT_username
-        # Encrypted username and time.
+        # Encrypted username and time. Time is used to prevent replay attacks.
+        username, time1 = lib.decrypt_tuple(authenticator_encrypted, TGS_session_key.encode('utf-8'))
+
 
         assert username == TGT_username
         assert addr == TGT_addr
@@ -42,6 +42,10 @@ class TGSServer(server.ResponseServer):
         # Client-to-server ticket
 
         SS_session_key_encrypted = lib.encrypt(SS_session_key, TGS_session_key)
+
+        with open("verify.data", "a") as myfile:
+            myfile.write(str(time.perf_counter_ns() - start_time) + "\n")
+
         return CTS_encrypted.decode('utf-8'), SS_session_key_encrypted.decode('utf-8')
 
 
