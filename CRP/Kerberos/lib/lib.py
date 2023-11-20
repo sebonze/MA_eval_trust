@@ -348,7 +348,7 @@ pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS)
 unpad = lambda s: s[:-ord(s[len(s) - 1:])]
 
 
-def one_way_hash(value):
+def one_way_hash_old(value):
     # Stop using md5. Need to find a cryptographically secure one-way hah
     # that outputs 32-byte quantities, or use different symmetric-key encryption
     # to take in variable-length keys
@@ -358,21 +358,32 @@ def one_way_hash(value):
     result = base64.b64encode(value_digest)
     return result.decode('utf8')
 
+def one_way_hash(value):
+    try :
+        return base64.b64encode(hashlib.sha384(value.encode('utf8')).digest())
+    except:
+        return base64.b64encode(hashlib.sha384(value).digest())
+
+
+
 
 def encrypt(txt, key):
     txt = str(txt)
 
-    try:
-        key = key.decode("utf8")
-    except:
-        key = str(key)
+    #try:
+    #    key = key.decode("utf8")
+    #except:
+    #    key = str(key)
+
+    if key[0] == "b" and key[1] == "'" and key[len(key) - 1] == key[1]:
+        key = key[2:66]
 
     key = one_way_hash(key)
-    key = str(key)
+    #key = str(key)
     txt = pad(txt).encode("utf8")
-    key = pad(key)
+    #key = pad(key)
     iv = os.urandom(16)[0:16]
-    cipher = AES.new(key.encode("utf8"), AES.MODE_CBC, iv)
+    cipher = AES.new(key[:32], AES.MODE_CBC, iv)
     return base64.b64encode(iv + cipher.encrypt(txt))
 
 
@@ -410,11 +421,11 @@ def decrypt(enc, key):
     #except:
     #    print("debug 6")
     key = one_way_hash(key)
-    key = str(key)
-    key = pad(key)
+    #key = str(key)
+    #key = pad(key)
     enc = base64.b64decode(enc)
     iv = enc[:16]
-    cipher = AES.new(key.encode("utf8"), AES.MODE_CBC, iv)
+    cipher = AES.new(key[:32], AES.MODE_CBC, iv)
     dec = cipher.decrypt(enc[16:])
     if unpad(dec) == b'':
         #print("debug 4")
