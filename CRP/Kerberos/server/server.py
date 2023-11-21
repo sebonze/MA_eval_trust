@@ -23,7 +23,7 @@ class ResponseServer(BaseHTTPRequestHandler):
         host, port = self.client_address
 
         if parsed_path.path == '/client':
-            #message = ('\r\n'.join(self.response(A, B, host)[0].decode("utf8") + self.response(A, B, host)[0].decode("utf8")))
+            # message = ('\r\n'.join(self.response(A, B, host)[0].decode("utf8") + self.response(A, B, host)[0].decode("utf8")))
             rmessage = self.response(A, B, host)
         else:
             rmessage = self.resolve(A, B, host)
@@ -45,5 +45,5 @@ def start(response_server, name, url, port):
         response_server(private, *args)
 
     server = HTTPServer((url, port), handler)
-    #print("started server on {}:{}".format(url, port))
+    # print("started server on {}:{}".format(url, port))
     server.serve_forever()

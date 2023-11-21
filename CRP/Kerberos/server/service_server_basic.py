@@ -35,7 +35,7 @@ class SSServerBasic(server.ResponseServer):
         return self.process_msg(message, CTS[0])
 
     def process_msg(self, message, user):
-        #print('received {} from {}'.format(message, user))
+        # print('received {} from {}'.format(message, user))
         return 'received {} from {}'.format(message, user)
 
 

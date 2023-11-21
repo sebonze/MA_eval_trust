@@ -9,8 +9,10 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+
 def print_fails(*values):
-    print(bcolors.FAIL+ " ".join(map(str,values))+bcolors.ENDC)
+    print(bcolors.FAIL + " ".join(map(str, values)) + bcolors.ENDC)
+
 
 def print_success(*values):
-    print(bcolors.OKGREEN+ " ".join(map(str,values))+bcolors.ENDC)
+    print(bcolors.OKGREEN + " ".join(map(str, values)) + bcolors.ENDC)

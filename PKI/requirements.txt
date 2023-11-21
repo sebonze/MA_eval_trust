@@ -1,4 +1,0 @@
-sqlalchemy
-cryptography
-pyOpenSsl
-texttable

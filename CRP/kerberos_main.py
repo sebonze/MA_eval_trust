@@ -1,5 +1,4 @@
 from multiprocessing import Process
-import time
 import os
 import CRP.Kerberos.server.key_distribution as db
 import CRP.Kerberos.server.server as server
@@ -8,7 +7,6 @@ from CRP.Kerberos.server.server_tgs import TGSServer
 from CRP.Kerberos.server.service_server_basic import SSServerBasic
 from CRP.Kerberos.server.service_server_bad import SSServerBad
 from CRP.Kerberos.client.client import KerberosClient
-import statistics
 
 
 def AS():
@@ -46,7 +44,6 @@ def start_all():
 
 
 def kerberos_performance_routine(c_init=1):
-
     kerberos_prep_t = []
     kerberos_sign_t = []
     kerberos_verify_t = []
@@ -70,11 +67,10 @@ def kerberos_performance_routine(c_init=1):
     CTS_good, CTS_key_good = client.authorize(TGT, TGS_key, 'Basic')
     assert client.service_request(CTS_good, CTS_key_good, 'http://localhost:8082/client')
 
-
     for proc in PROCS:
         proc.kill()
 
-    #get data from time logs
+    # get data from time logs
     # Open the file and read lines
     with open("prep.data", 'r') as file:
         for line in file:
@@ -92,6 +88,7 @@ def kerberos_performance_routine(c_init=1):
             kerberos_verify_t.append(int(line.strip()))
 
     return [kerberos_prep_t, kerberos_sign_t, kerberos_verify_t]
+
 
 if __name__ == "__main__":
     kerberos_performance_routine()

@@ -46,21 +46,21 @@ def print_data():
     table.add_row(["Schnorr Prep", schnorr_crypto_info, min(schnorr_data[0]), max(schnorr_data[0]), statistics.mean(schnorr_data[0]), "N/A", "N/A", 100])
     table.add_row(["Schnorr Sign", schnorr_crypto_info, min(schnorr_data[1]), max(schnorr_data[1]), statistics.mean(schnorr_data[1]), "N/A", "N/A", 100])
     table.add_row(["Schnorr Verify", schnorr_crypto_info, min(schnorr_data[2]), max(schnorr_data[2]), statistics.mean(schnorr_data[2]), "N/A", "N/A", 100])
-    table.add_row(["Schnorr Total", schnorr_crypto_info, st_min, st_max, st_mean, "N/A", "N/A", 100])
+    table.add_row(["Schnorr Total", schnorr_crypto_info, st_min, st_max, st_mean, "422", "N/A", 100])
 
     table.add_row(["-----", "-----", "-----", "-----", "-----", "-----", "-----", "-----"])
 
     table.add_row(["PKI Prep", pki_crypto_info, min(pki_data[0]), max(pki_data[0]), statistics.mean(pki_data[0]), "N/A", "N/A", 100])
     table.add_row(["PKI Sign", pki_crypto_info, min(pki_data[1]), max(pki_data[1]), statistics.mean(pki_data[1]), "N/A", "N/A", 100])
     table.add_row(["PKI Verify", pki_crypto_info, min(pki_data[2]), max(pki_data[2]), statistics.mean(pki_data[2]), "N/A", "N/A", 100])
-    table.add_row(["PKI Total", pki_crypto_info, pt_min, pt_max, pt_mean, "N/A", "N/A", 100])
+    table.add_row(["PKI Total", pki_crypto_info, pt_min, pt_max, pt_mean, "3257", "N/A", 100])
 
     table.add_row(["-----", "-----", "-----", "-----", "-----", "-----", "-----", "-----"])
 
     table.add_row(["Kerberos Prep", kerberos_crypto_info, min(kerberos_data[0]), max(kerberos_data[0]), statistics.mean(kerberos_data[0]), "N/A", "N/A", 100])
     table.add_row(["Kerberos Sign", kerberos_crypto_info, min(kerberos_data[1]), max(kerberos_data[1]), statistics.mean(kerberos_data[1]), "N/A", "N/A", 100])
     table.add_row(["Kerberos Verify", kerberos_crypto_info, min(kerberos_data[2]), max(kerberos_data[2]), statistics.mean(kerberos_data[2]), "N/A", "N/A", 100])
-    table.add_row(["Kerberos Total", kerberos_crypto_info, kt_min, kt_max, kt_mean, "N/A", "N/A", 100])
+    table.add_row(["Kerberos Total", kerberos_crypto_info, kt_min, kt_max, kt_mean, "168", "N/A", 100])
 
 
     # Print table
@@ -72,6 +72,4 @@ if __name__ == "__main__":
     kerberos_data = kerberos_main.kerberos_performance_routine()
     schnorr_data = schnorr_main.schnorr_performance_routine()
     pki_data = pki_main.pki_performance_routine()
-
-
     print_data()

@@ -5,7 +5,7 @@ from ZKP.Schnorr.schnorr_test import schnorr_sign
 from ZKP.Schnorr.schnorr_test import schnorr_verify
 
 
-def schnorr_performance_routine(c_init=10):
+def schnorr_performance_routine(c_init=1):
     schnorr_prep_t = []
     schnorr_sign_t = []
     schnorr_verify_t = []
@@ -54,6 +54,7 @@ def schnorr_performance_routine(c_init=10):
         sig_actual = schnorr_sign(msg, sec_key, aux_rand)
 
         schnorr_sign_t.append(time.perf_counter_ns() - start_time)
+        print(str(sys.getsizeof(msg) + sys.getsizeof(sec_key) + sys.getsizeof(aux_rand)) + ' bytes SCHNORR')
 
     for c in range(c_init):
         start_time = time.perf_counter_ns()
@@ -61,6 +62,7 @@ def schnorr_performance_routine(c_init=10):
         assert schnorr_verify(msg, pubkey, sig_actual)
 
         schnorr_verify_t.append(time.perf_counter_ns() - start_time)
+        print(str(sys.getsizeof(msg) + sys.getsizeof(pubkey) + sys.getsizeof(sig_actual)) + ' bytes SCHNORR')
 
     # print(sys.getsizeof(sig_actual))
     # print(sys.getsizeof(msg))

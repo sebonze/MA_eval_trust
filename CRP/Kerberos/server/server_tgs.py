@@ -28,7 +28,6 @@ class TGSServer(server.ResponseServer):
         # Encrypted username and time. Time is used to prevent replay attacks.
         username, time1 = lib.decrypt_tuple(authenticator_encrypted, TGS_session_key.encode('utf-8'))
 
-
         assert username == TGT_username
         assert addr == TGT_addr
         # Make sure they are who they say they are. I think we could omit this.

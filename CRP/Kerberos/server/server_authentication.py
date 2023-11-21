@@ -44,7 +44,7 @@ class AuthenticationServer(server.ResponseServer):
 
         # Begin the response
         self.send_response(200, message=None)
-        #self.send_header('Content-type', 'text/html')
+        # self.send_header('Content-type', 'text/html')
         self.end_headers()
         username = form['username'].value
         password = form['password'].value

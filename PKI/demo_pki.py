@@ -1,3 +1,5 @@
+import sys
+
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
@@ -24,11 +26,11 @@ def generate_private_key(password=None):
 # Function to generate a self-signed CA certificate
 def generate_ca_certificate(private_key):
     subject = issuer = x509.Name([
-        x509.NameAttribute(NameOID.COUNTRY_NAME, u"US"),
-        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"California"),
-        x509.NameAttribute(NameOID.LOCALITY_NAME, u"San Francisco"),
-        x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"My Company"),
-        x509.NameAttribute(NameOID.COMMON_NAME, u"MyCompany Root CA"),
+        x509.NameAttribute(NameOID.COUNTRY_NAME, u"GER"),
+        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"BAVARIA"),
+        x509.NameAttribute(NameOID.LOCALITY_NAME, u"DEISENHOFEN"),
+        x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"ASD DLR"),
+        x509.NameAttribute(NameOID.COMMON_NAME, u"TEST Root CA"),
     ])
 
     ca_cert = x509.CertificateBuilder().subject_name(
@@ -72,10 +74,10 @@ def issue_certificate(subject_name, ca_private_key, ca_certificate):
     )
 
     subject = x509.Name([
-        x509.NameAttribute(NameOID.COUNTRY_NAME, u"US"),
-        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"California"),
-        x509.NameAttribute(NameOID.LOCALITY_NAME, u"San Francisco"),
-        x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"My Company"),
+        x509.NameAttribute(NameOID.COUNTRY_NAME, u"GER"),
+        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"BAVARIA"),
+        x509.NameAttribute(NameOID.LOCALITY_NAME, u"DEISENHOFEN"),
+        x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"ASD DLR"),
         x509.NameAttribute(NameOID.COMMON_NAME, subject_name),
     ])
 
@@ -139,7 +141,8 @@ def is_certificate_revoked(certificate, crl):
             return True
     return False
 
-def pki_routine(c_init=10):
+
+def pki_routine(c_init=1):
     pki_prep_t = []
     pki_sign_t = []
     pki_verify_t = []
@@ -148,10 +151,10 @@ def pki_routine(c_init=10):
     os.makedirs("tmp_cert", exist_ok=True)
 
     for c in range(c_init):
-
         start_time = time.perf_counter_ns()
         # Generate CA private key and save it
         ca_private_key, ca_private_key_pem = generate_private_key(password="mysecurepassword")
+
         with open("tmp_cert/ca_private_key.pem", "wb") as f:
             f.write(ca_private_key_pem)
 
@@ -161,6 +164,8 @@ def pki_routine(c_init=10):
             f.write(ca_cert_pem)
 
         pki_prep_t.append(time.perf_counter_ns() - start_time)
+        print(str(sys.getsizeof(ca_private_key) + sys.getsizeof(ca_private_key_pem) + sys.getsizeof(
+            ca_cert_pem)) + ' bytes PKI')
 
     # Load CA private key and certificate
     ca_private_key, ca_certificate = load_ca_private_key_and_cert()
@@ -176,11 +181,12 @@ def pki_routine(c_init=10):
             f.write(entity_certificate_pem)
 
         pki_sign_t.append(time.perf_counter_ns() - start_time)
+        print(str(sys.getsizeof(entity_private_key) + sys.getsizeof(entity_certificate_pem)) + ' bytes PKI')
 
     # Load the issued certificate
     with open(f"tmp_cert/{entity_name}_certificate.pem", "rb") as f:
         entity_certificate = x509.load_pem_x509_certificate(f.read())
-
+    print(str(sys.getsizeof(entity_certificate)) + ' bytes PKI')
     for c in range(c_init):
         start_time = time.perf_counter_ns()
 
@@ -188,7 +194,7 @@ def pki_routine(c_init=10):
         is_valid = validate_certificate(entity_certificate, ca_certificate)
 
         pki_verify_t.append(time.perf_counter_ns() - start_time)
-
+        print(str(sys.getsizeof(entity_certificate) + sys.getsizeof(ca_certificate)) + ' bytes PKI')
     # Revoke the certificate and save CRL
     crl_pem = revoke_certificate(entity_certificate, ca_private_key, ca_certificate)
     with open("tmp_cert/crl.pem", "wb") as f:
@@ -200,6 +206,6 @@ def pki_routine(c_init=10):
 
     # Check revocation status
     is_revoked = is_certificate_revoked(entity_certificate, crl)
-    #print("Certificate is revoked:", is_revoked)
+    # print("Certificate is revoked:", is_revoked)
 
     return [pki_prep_t, pki_sign_t, pki_verify_t]

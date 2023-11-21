@@ -8,17 +8,21 @@ from Crypto.Cipher import AES, PKCS1_OAEP
 from Crypto.PublicKey import RSA as RSA_dome
 from Crypto.Random import get_random_bytes
 
+
 # Symmetric Key Generation and Encryption/Decryption using cryptography
 def cryptography_generate_symmetric_key():
     return Fernet.generate_key()
+
 
 def cryptography_symmetric_encrypt(key, plaintext):
     cipher = Fernet(key)
     return cipher.encrypt(plaintext.encode())
 
+
 def cryptography_symmetric_decrypt(key, ciphertext):
     cipher = Fernet(key)
     return cipher.decrypt(ciphertext).decode()
+
 
 # Asymmetric Key Generation and Encryption/Decryption using cryptography
 def cryptography_generate_asymmetric_keypair():
@@ -28,6 +32,7 @@ def cryptography_generate_asymmetric_keypair():
     )
     public_key = private_key.public_key()
     return private_key, public_key
+
 
 def cryptography_asymmetric_encrypt(public_key, plaintext):
     ciphertext = public_key.encrypt(
@@ -40,6 +45,7 @@ def cryptography_asymmetric_encrypt(public_key, plaintext):
     )
     return ciphertext
 
+
 def cryptography_asymmetric_decrypt(private_key, ciphertext):
     plaintext = private_key.decrypt(
         ciphertext,
@@ -51,9 +57,11 @@ def cryptography_asymmetric_decrypt(private_key, ciphertext):
     )
     return plaintext.decode()
 
+
 # Symmetric Key Generation and Encryption/Decryption using pycryptodome
 def pycryptodome_generate_symmetric_key():
     return get_random_bytes(16)
+
 
 def pycryptodome_symmetric_encrypt(key, plaintext):
     cipher = AES.new(key, AES.MODE_EAX)
@@ -61,10 +69,12 @@ def pycryptodome_symmetric_encrypt(key, plaintext):
     ciphertext, tag = cipher.encrypt_and_digest(plaintext.encode())
     return (nonce, ciphertext)
 
+
 def pycryptodome_symmetric_decrypt(key, nonce, ciphertext):
     cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
     plaintext = cipher.decrypt(ciphertext)
     return plaintext.decode()
+
 
 # Asymmetric Key Generation and Encryption/Decryption using pycryptodome
 def pycryptodome_generate_asymmetric_keypair():
@@ -73,17 +83,20 @@ def pycryptodome_generate_asymmetric_keypair():
     public_key = key.publickey().export_key()
     return private_key, public_key
 
+
 def pycryptodome_asymmetric_encrypt(public_key, plaintext):
     recipient_key = RSA_dome.import_key(public_key)
     cipher_rsa = PKCS1_OAEP.new(recipient_key)
     ciphertext = cipher_rsa.encrypt(plaintext.encode())
     return ciphertext
 
+
 def pycryptodome_asymmetric_decrypt(private_key, ciphertext):
     key = RSA_dome.import_key(private_key)
     cipher_rsa = PKCS1_OAEP.new(key)
     plaintext = cipher_rsa.decrypt(ciphertext)
     return plaintext.decode()
+
 
 # Debug/Demonstration functions
 if __name__ == "__main__":

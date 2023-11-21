@@ -9,13 +9,13 @@ def main():
     parser.add_argument('-s', '--signature', type=str, required=True, help='signature')
     parser.add_argument("-p", "--public_key", type=str, required=True, help='Public key or public aggregate X~')
     parser.add_argument('-m', '--message', type=str, required=True, help='Message')
-    
+
     args = parser.parse_args()
     pubkey = args.public_key
     msg = args.message
     sig = args.signature
-    
-    try: 
+
+    try:
         msg_bytes = sha384(msg.encode())
         sig_bytes = bytes.fromhex(sig)
         pubkey_bytes = bytes.fromhex(pubkey)
@@ -33,7 +33,6 @@ def main():
         print_fails("[e] Exception:", e)
         sys.exit(2)
 
-if __name__ == "__main__":
-   main()
- 
 
+if __name__ == "__main__":
+    main()

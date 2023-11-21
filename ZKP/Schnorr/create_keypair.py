@@ -1,6 +1,6 @@
 import argparse, json, os
 
-from schnorr_lib import n, has_even_y, pubkey_point_gen_from_int, bytes_from_point 
+from schnorr_lib import n, has_even_y, pubkey_point_gen_from_int, bytes_from_point
 
 
 def create_keypair(n_keys: int):
@@ -29,11 +29,14 @@ def create_keypair(n_keys: int):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Creates one or more key pairs which are stored in a JSON file and can be used to sign and verify a message')
-    parser.add_argument('-n', '--nkeys', type=int, required=False, help='Number of pairs of keys to generate, if not specified a single keypair will be generated')
+    parser = argparse.ArgumentParser(
+        description='Creates one or more key pairs which are stored in a JSON file and can be used to sign and verify '
+                    'a message')
+    parser.add_argument('-n', '--nkeys', type=int, required=False,
+                        help='Number of pairs of keys to generate, if not specified a single keypair will be generated')
     n_keys = parser.parse_args().nkeys
 
-    if not n_keys: 
+    if not n_keys:
         n_keys = 1
 
     users = create_keypair(n_keys)

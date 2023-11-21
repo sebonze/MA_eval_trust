@@ -3,6 +3,7 @@ from utils import print_fails
 from schnorr_lib import sha384, schnorr_sign, schnorr_musig_sign, schnorr_musig2_sign
 
 def main():
+    global sig
     parser = argparse.ArgumentParser(
         description='returns the signature and the public key from a private key and a message')
     parser.add_argument('-m', '--message', type=str, required=True, help='Message to be signed')

@@ -16,5 +16,5 @@ def create_table(solution, crypto_info, min_time, max_time, mean_time, num_routi
 
 
 if __name__ == "__main__":
-    create_table("Blockchain", "RSA", 1, 3, 2,100)
+    create_table("Blockchain", "RSA", 1, 3, 2, 100)
     create_table("Blockchain", "RSA", 1, 3, 2, 100)

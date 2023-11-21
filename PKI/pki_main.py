@@ -1,11 +1,7 @@
-import os
-import subprocess
-import time
 import PKI.demo_pki as demo_pki
-import statistics
 
-def pki_performance_routine(c_init=10):
 
+def pki_performance_routine(c_init=1):
     return demo_pki.pki_routine(c_init)
 
 

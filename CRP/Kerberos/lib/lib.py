@@ -37,12 +37,6 @@ def crt(X, P):
     return z % pi
 
 
-#############################################################################
-#                                                                           #
-#                     Primality Testing and Generation                      #
-#                                                                           #
-#############################################################################
-
 def sieve(n):
     A = [True] * (n + 1)
     A[0] = False
@@ -108,7 +102,7 @@ def miller_rabin_test(n, k):
             t += 1
             m = q
         except:
-            #print("{} {} {} {} {}".format(q, r, t, m, n))
+            # print("{} {} {} {} {}".format(q, r, t, m, n))
             pass
 
     # x = a^d mod n
@@ -162,12 +156,6 @@ def primeFactor(n):
     return (primefacs, exp)
 
 
-#############################################################################
-#                                                                           #
-#                           Discrete Log Solvers                            #
-#                                                                           #
-#############################################################################
-
 # Baby step giant step algorithm
 def dl3(g, h, p):
     m = int(ceil(sqrt(p)))
@@ -216,13 +204,6 @@ def discreteLog(g, h, q):
     return crt(C, P)
 
 
-#############################################################################
-#                                                                           #
-#                       RSA Cracking and Factorization                      #
-#                                                                           #
-#############################################################################
-
-
 # pollard p-1 algorithm
 def factor(n):
     a = 2
@@ -243,12 +224,6 @@ def rsa_crack(e, c, n):
     m = pow(c, d, n)
     return m
 
-
-#############################################################################
-#                                                                           #
-#              Modular Polynomial Arithmetic in Fp[x]/(m)                   #
-#                                                                           #
-#############################################################################
 
 def div(p1, m, p):
     result = [0] * len(p1)
@@ -312,12 +287,6 @@ def sub(p1, p2, m, p):
     return reducer(result, m, p)
 
 
-#############################################################################
-#                                                                           #
-#                     Block Chain Encryption, Decryption                    #
-#                                                                           #
-#############################################################################
-
 # e is a encryption function
 def encrypt_blockchain(M, e, iv=5):
     M = map(int, M)
@@ -336,13 +305,6 @@ def decrypt_blockchain(C, d, iv=5):
     return M
 
 
-#############################################################################
-#                                                                           #
-#                     Symmetric Key Encryption                              #
-#                                                                           #
-#############################################################################
-
-
 BS = 16
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS)
 unpad = lambda s: s[:-ord(s[len(s) - 1:])]
@@ -358,30 +320,29 @@ def one_way_hash_old(value):
     result = base64.b64encode(value_digest)
     return result.decode('utf8')
 
+
 def one_way_hash(value):
-    try :
+    try:
         return base64.b64encode(hashlib.sha384(value.encode('utf8')).digest())
     except:
         return base64.b64encode(hashlib.sha384(value).digest())
 
 
-
-
 def encrypt(txt, key):
     txt = str(txt)
 
-    #try:
+    # try:
     #    key = key.decode("utf8")
-    #except:
+    # except:
     #    key = str(key)
 
     if key[0] == "b" and key[1] == "'" and key[len(key) - 1] == key[1]:
         key = key[2:66]
 
     key = one_way_hash(key)
-    #key = str(key)
+    # key = str(key)
     txt = pad(txt).encode("utf8")
-    #key = pad(key)
+    # key = pad(key)
     iv = os.urandom(16)[0:16]
     cipher = AES.new(key[:32], AES.MODE_CBC, iv)
     return base64.b64encode(iv + cipher.encrypt(txt))
@@ -389,46 +350,46 @@ def encrypt(txt, key):
 
 def decrypt(enc, key):
     try:
-        if chr(enc[0]) == "b" and chr(enc[1]) == "'" and chr(enc[len(enc)-1]) == ")" and chr(enc[len(enc)-2]) == "'":
+        if chr(enc[0]) == "b" and chr(enc[1]) == "'" and chr(enc[len(enc) - 1]) == ")" and chr(
+                enc[len(enc) - 2]) == "'":
             enc = enc[2:90]
     except:
-        #print("debug 1")
+        # print("debug 1")
         pass
 
     try:
-        if chr(enc[0]) == "(" and chr(enc[1]) == "b" and chr(enc[len(enc)-1]) == ")" and chr(enc[len(enc)-2]) == ",":
+        if chr(enc[0]) == "(" and chr(enc[1]) == "b" and chr(enc[len(enc) - 1]) == ")" and chr(
+                enc[len(enc) - 2]) == ",":
             enc = enc[3:47]
     except:
-        #print("debug 7")
+        # print("debug 7")
         pass
 
     try:
-        if enc[0] == "(" and enc[1] == "b" and enc[len(enc)-1] == "," and enc[len(enc)-2] == '\'':
+        if enc[0] == "(" and enc[1] == "b" and enc[len(enc) - 1] == "," and enc[len(enc) - 2] == '\'':
             enc = enc[3:155]
     except:
-        #print("debug 2")
+        # print("debug 2")
         pass
-
-
 
     try:
         key = key.decode("utf8")
     except:
         key = str(key)
-    #try:
+    # try:
     #    if key[0] == "b" and key[1] == '\'' and key[len(key)-1] == '\'':
     #        key = key[2:38]
-    #except:
+    # except:
     #    print("debug 6")
     key = one_way_hash(key)
-    #key = str(key)
-    #key = pad(key)
+    # key = str(key)
+    # key = pad(key)
     enc = base64.b64decode(enc)
     iv = enc[:16]
     cipher = AES.new(key[:32], AES.MODE_CBC, iv)
     dec = cipher.decrypt(enc[16:])
     if unpad(dec) == b'':
-        #print("debug 4")
+        # print("debug 4")
         return dec
     return unpad(dec)
 
@@ -443,12 +404,12 @@ def decrypt_tuple(txt, key):
     try:
         return literal_eval(decr.decode())
     except:
-        #print("debug 3")
+        # print("debug 3")
         pass
 
     try:
         return literal_eval(decr)
     except:
-        #print("debug 5")
+        # print("debug 5")
         pass
     return decr

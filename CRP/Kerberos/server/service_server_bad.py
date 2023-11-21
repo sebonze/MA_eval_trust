@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 import CRP.Kerberos.server.server as server
 import CRP.Kerberos.lib.lib as lib
 
