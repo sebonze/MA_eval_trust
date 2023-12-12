@@ -5,7 +5,7 @@ from ZKP.Schnorr.schnorr_test import schnorr_sign
 from ZKP.Schnorr.schnorr_test import schnorr_verify
 
 
-def schnorr_performance_routine(c_init=10):
+def schnorr_performance_routine(c_init=100):
     schnorr_prep_t = []
     schnorr_sign_t = []
     schnorr_verify_t = []

@@ -43,7 +43,7 @@ def start_all():
     #    proc.join()
 
 
-def kerberos_performance_routine(c_init=1):
+def kerberos_performance_routine(c_init=100):
     kerberos_prep_t = []
     kerberos_sign_t = []
     kerberos_verify_t = []

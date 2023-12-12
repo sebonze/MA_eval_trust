@@ -130,7 +130,7 @@ def is_certificate_revoked(certificate, crl):
             return True
     return False
 
-def pki_routine(c_init=10):
+def pki_routine(c_init=100):
     msg_hex = "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89"
     msg = bytes.fromhex(msg_hex)
     pki_prep_t = []
