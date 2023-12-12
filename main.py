@@ -8,7 +8,7 @@ schnorr_crypto_info = "SECP256K1, SHA-384"
 schnorr_data = None
 schnorr_bytes = 0
 
-pki_crypto_info = "ECDSA P-384, SHA-384"
+pki_crypto_info = "SECP256K1, SHA-384"
 pki_data = None
 pki_bytes = 0
 

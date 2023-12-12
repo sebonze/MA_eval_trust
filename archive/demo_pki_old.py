@@ -2,16 +2,20 @@ import hashlib
 import sys
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import ec, padding
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.x509.oid import NameOID
 from cryptography.exceptions import InvalidSignature
 from datetime import datetime, timedelta
 import os
 import time
 
+
 # Function to generate a private key
 def generate_private_key(password=None):
-    key = ec.generate_private_key(ec.SECP256K1())
+    key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=2048,
+    )
     if password:
         encryption = serialization.BestAvailableEncryption(password.encode())
     else:
@@ -20,7 +24,6 @@ def generate_private_key(password=None):
 
 def sha384(b: bytes) -> bytes:
     return hashlib.sha384(b).digest()
-
 # Function to generate a self-signed CA certificate
 def generate_ca_certificate(private_key):
     subject = issuer = x509.Name([
@@ -49,22 +52,27 @@ def generate_ca_certificate(private_key):
 
     return ca_cert.public_bytes(serialization.Encoding.PEM)
 
+
 # Load CA private key and certificate
 def load_ca_private_key_and_cert():
-    with open("tmp_cert/ca_private_key.pem", "rb") as key_file:
+    with open("../PKI/tmp_cert/ca_private_key.pem", "rb") as key_file:
         ca_private_key = serialization.load_pem_private_key(
             key_file.read(),
             password=b'mysecurepassword'
         )
 
-    with open("tmp_cert/ca_certificate.pem", "rb") as cert_file:
+    with open("../PKI/tmp_cert/ca_certificate.pem", "rb") as cert_file:
         ca_certificate = x509.load_pem_x509_certificate(cert_file.read())
 
     return ca_private_key, ca_certificate
 
+
 # Function to issue a certificate
 def issue_certificate(subject_name, ca_private_key, ca_certificate):
-    private_key = ec.generate_private_key(ec.SECP256K1())
+    private_key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=2048,
+    )
 
     subject = x509.Name([
         x509.NameAttribute(NameOID.COUNTRY_NAME, u"DE"),
@@ -92,6 +100,7 @@ def issue_certificate(subject_name, ca_private_key, ca_certificate):
 
     return private_key, cert.public_bytes(serialization.Encoding.PEM)
 
+
 # Function to validate a certificate
 def validate_certificate(certificate, ca_certificate):
     try:
@@ -99,11 +108,13 @@ def validate_certificate(certificate, ca_certificate):
         ca_public_key.verify(
             certificate.signature,
             certificate.tbs_certificate_bytes,
-            ec.ECDSA(hashes.SHA256())
+            padding.PKCS1v15(),
+            certificate.signature_hash_algorithm,
         )
         return True
     except InvalidSignature:
         return False
+
 
 # Function to revoke a certificate
 def revoke_certificate(certificate, ca_private_key, ca_certificate):
@@ -123,12 +134,14 @@ def revoke_certificate(certificate, ca_private_key, ca_certificate):
     )
     return crl.public_bytes(serialization.Encoding.PEM)
 
+
 # Function to check revocation status
 def is_certificate_revoked(certificate, crl):
     for revoked_cert in crl:
         if revoked_cert.serial_number == certificate.serial_number:
             return True
     return False
+
 
 def pki_routine(c_init=10):
     msg_hex = "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89"
@@ -138,19 +151,19 @@ def pki_routine(c_init=10):
     pki_verify_t = []
 
     # Directory setup
-    os.makedirs("tmp_cert", exist_ok=True)
+    os.makedirs("../PKI/tmp_cert", exist_ok=True)
 
     for c in range(c_init):
         start_time = time.perf_counter_ns()
         # Generate CA private key and save it
         ca_private_key, ca_private_key_pem = generate_private_key(password="mysecurepassword")
 
-        with open("tmp_cert/ca_private_key.pem", "wb") as f:
+        with open("../PKI/tmp_cert/ca_private_key.pem", "wb") as f:
             f.write(ca_private_key_pem)
 
         # Generate CA certificate and save it
         ca_cert_pem = generate_ca_certificate(ca_private_key)
-        with open("tmp_cert/ca_certificate.pem", "wb") as f:
+        with open("../PKI/tmp_cert/ca_certificate.pem", "wb") as f:
             f.write(ca_cert_pem)
 
         pki_prep_t.append(time.perf_counter_ns() - start_time)
@@ -188,11 +201,11 @@ def pki_routine(c_init=10):
         print(str(sys.getsizeof(entity_certificate) + sys.getsizeof(ca_certificate)) + ' bytes PKI')
     # Revoke the certificate and save CRL
     crl_pem = revoke_certificate(entity_certificate, ca_private_key, ca_certificate)
-    with open("tmp_cert/crl.pem", "wb") as f:
+    with open("../PKI/tmp_cert/crl.pem", "wb") as f:
         f.write(crl_pem)
 
     # Load CRL
-    with open("tmp_cert/crl.pem", "rb") as f:
+    with open("../PKI/tmp_cert/crl.pem", "rb") as f:
         crl = x509.load_pem_x509_crl(f.read())
 
     # Check revocation status
@@ -201,7 +214,6 @@ def pki_routine(c_init=10):
 
     return [pki_prep_t, pki_sign_t, pki_verify_t]
 
-# Main routine
 if __name__ == "__main__":
     pki_results = pki_routine()
     print("PKI routine completed.")
