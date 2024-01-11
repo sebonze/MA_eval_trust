@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Sudmann"
+    given-names: "Niklas"
+    orcid: "NA"
+title: "Python Implementation for Evaluating Trust Solution in Digital Aeronautical Communications Systems"
+version: "1.0.0"
+date-released: "2023-12-01"
+url: "https://github.com/sebonze/MA_eval_trust"
