@@ -20,19 +20,19 @@ The repository MA_eval_trust focuses on evaluating trust solutions in digital ae
 | Trust Solution  | Cipher & Hash        | Min Time  | Max Time  | Mean Time   | Size (Byte) | Latency * | Number of Routines |
 |-----------------|----------------------|-----------|-----------|-------------|-------------|-----------|--------------------|
 | Schnorr Prep    | SECP256K1, SHA-384   | 800       | 6800      | 942         | -           | N/A       | 100                |
-| Schnorr Sign    | SECP256K1, SHA-384   | 175428500 | 190312700 | 178156113   | -           | N/A       | 100                |
-| Schnorr Verify  | SECP256K1, SHA-384   | 87034900  | 99952500  | 88279690    | -           | N/A       | 100                |
-| Schnorr Total   | SECP256K1, SHA-384   | 262464200 | 290272000 | 266436745   | 227         | N/A       | 100                |
+| Schnorr Sign    | SECP256K1, SHA-384   | 175428500 | 190312700 | 178156113   | 195         | N/A       | 100                |
+| Schnorr Verify  | SECP256K1, SHA-384   | 87034900  | 99952500  | 88279690    | 227         | N/A       | 100                |
+| Schnorr Total   | SECP256K1, SHA-384   | 262464200 | 290272000 | 266436745   | 422         | N/A       | 100                |
 | -----           | -----                | -----     | -----     | -----       | -----       | -----     | -----              |
 | PKI Prep        | SECP256K1, SHA-384   | 2931900   | 27601800  | 3229384     | -           | N/A       | 100                |
-| PKI Sign        | SECP256K1, SHA-384   | 1638300   | 2065900   | 1672176     | -           | N/A       | 100                |
-| PKI Verify      | SECP256K1, SHA-384   | 736000    | 890200    | 752647      | -           | N/A       | 100                |
-| PKI Total       | SECP256K1, SHA-384   | 5306200   | 30557900  | 5654207     | 1209        | N/A       | 100                |
+| PKI Sign        | SECP256K1, SHA-384   | 1638300   | 2065900   | 1672176     | 497         | N/A       | 100                |
+| PKI Verify      | SECP256K1, SHA-384   | 736000    | 890200    | 752647      | 1200        | N/A       | 100                |
+| PKI Total       | SECP256K1, SHA-384   | 5306200   | 30557900  | 5654207     | 1697        | N/A       | 100                |
 | -----           | -----                | -----     | -----     | -----       | -----       | -----     | -----              |
-| Kerberos Prep   | AES 256 CBC, SHA-384 | 879800    | 1224700   | 986164      | -           | N/A       | 100                |
-| Kerberos Sign   | AES 256 CBC, SHA-384 | 2145400   | 4707100   | 2423686     | -           | N/A       | 100                |
-| Kerberos Verify | AES 256 CBC, SHA-384 | 2190700   | 2278100   | 2239000     | -           | N/A       | 100                |
-| Kerberos Total  | AES 256 CBC, SHA-384 | 5215900   | 8209900   | 5648851     | 168         | N/A       | 100                |
+| Kerberos Prep   | AES 256 CBC, SHA-384 | 879800    | 1224700   | 986164      | --          | N/A       | 100                |
+| Kerberos Sign   | AES 256 CBC, SHA-384 | 2145400   | 4707100   | 2423686     | 168         | N/A       | 100                |
+| Kerberos Verify | AES 256 CBC, SHA-384 | 2190700   | 2278100   | 2239000     | 56          | N/A       | 100                |
+| Kerberos Total  | AES 256 CBC, SHA-384 | 5215900   | 8209900   | 5648851     | 224         | N/A       | 100                |
 | -----           | -----                | -----     | -----     | -----       | -----       | -----     | -----              |
 
 
