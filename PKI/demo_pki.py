@@ -205,3 +205,55 @@ def pki_routine(c_init=100):
 if __name__ == "__main__":
     pki_results = pki_routine()
     print("PKI routine completed.")
+
+# -------------------------------------------------------------------------------------------------
+#
+def SIG(private_key, message):
+    """Generate a signature over the message using the private key."""
+    return sign_data(private_key, message)
+
+def MAC(key, message):
+    """Generate a MAC over the message using a shared key."""
+    return mac(key, message)
+
+# Protocol implementation starts here
+class LDACSAuthenticationProtocol:
+    def __init__(self):
+        # Initialize keys, nonces, and other parameters
+        self.private_key_GS = generate_private_key()
+        self.private_key_AS = generate_private_key()
+        # Assume k_M is a predefined shared MAC key
+        self.k_M = os.urandom(16)  # Placeholder for shared MAC key
+        # Placeholders for public keys, nonces, and other protocol-specific parameters
+        self.P_GS = None
+        self.P_AS = None
+        self.N_GS = generate_nonce()
+        self.N_AS = generate_nonce()
+        # UA and SAC values would be predefined or configured outside this scope
+        self.UA_GS = "UA_GS_PLACEHOLDER"
+        self.UA_AS = "UA_AS_PLACEHOLDER"
+        self.SAC_GS = "SAC_GS_PLACEHOLDER"
+        self.SAC_AS = "SAC_AS_PLACEHOLDER"
+
+    def step1(self):
+        """GS to AS: Send P_GS and N_GS."""
+        self.P_GS = self.private_key_GS.public_key()
+        return {"P_GS": self.P_GS, "N_GS": self.N_GS}
+
+    def step2(self, P_GS, N_GS):
+        """AS to GS: Respond with P_AS, N_AS, σ_AS, and t_AS."""
+        self.P_AS = self.private_key_AS.public_key()
+        message = f"{self.P_AS}{P_GS}{self.UA_GS}{self.SAC_GS}{self.N_AS}"
+        σ_AS = SIG(self.private_key_AS, message)
+        t_AS = MAC(self.k_M, message)
+        return {"P_AS": self.P_AS, "N_AS": self.N_AS, "σ_AS": σ_AS, "t_AS": t_AS}
+
+    def step3(self, P_AS, N_AS, σ_AS, t_AS):
+        """GS to AS: Send OCSP_Cert_GS, Cert_GS, σ_GS, and t_GS."""
+        message = f"{self.P_GS}{P_AS}{self.UA_AS}{self.SAC_AS}{self.N_GS}"
+        σ_GS = SIG(self.private_key_GS, message)
+        t_GS = MAC(self.k_M, message)
+        # OCSP_Cert_GS and Cert_GS would be retrieved or generated as part of the PKI infrastructure
+        OCSP_Cert_GS = "OCSP_CERT_PLACEHOLDER"
+        Cert_GS = "CERT_PLACEHOLDER"
+        return {"OCSP_Cert_GS": OCSP_Cert_GS, "Cert_GS": Cert_GS, "σ_GS": σ_GS, "t_GS": t_GS}
