@@ -1,11 +1,12 @@
 import sys
 import time
+
+from ZKP.Schnorr.schnorr_protocol import run_schnorr_protocol_sha384
 from ZKP.Schnorr.schnorr_test import pubkey_gen
 from ZKP.Schnorr.schnorr_test import schnorr_sign
 from ZKP.Schnorr.schnorr_test import schnorr_verify
 
-
-def schnorr_performance_routine(c_init=100):
+def schnor_signature_routine():
     schnorr_prep_t = []
     schnorr_sign_t = []
     schnorr_verify_t = []
@@ -21,7 +22,7 @@ def schnorr_performance_routine(c_init=100):
 
     sig_actual = None
 
-    for c in range(c_init):
+    for c in range():
 
         sec_key1_hex = ""
         pubkey_hex = ""
@@ -48,7 +49,7 @@ def schnorr_performance_routine(c_init=100):
 
 
 
-    for c in range(c_init):
+    for c in range():
         start_time = time.perf_counter_ns()
 
         sig_actual = schnorr_sign(msg, sec_key, aux_rand)
@@ -56,7 +57,7 @@ def schnorr_performance_routine(c_init=100):
         schnorr_sign_t.append(time.perf_counter_ns() - start_time)
         print(str(sys.getsizeof(msg) + sys.getsizeof(sec_key) + sys.getsizeof(aux_rand)) + ' bytes SCHNORR')
 
-    for c in range(c_init):
+    for c in range():
         start_time = time.perf_counter_ns()
 
         assert schnorr_verify(msg, pubkey, sig_actual)
@@ -64,13 +65,10 @@ def schnorr_performance_routine(c_init=100):
         schnorr_verify_t.append(time.perf_counter_ns() - start_time)
         print(str(sys.getsizeof(msg) + sys.getsizeof(pubkey) + sys.getsizeof(sig_actual)) + ' bytes SCHNORR')
 
-    # print(sys.getsizeof(sig_actual))
-    # print(sys.getsizeof(msg))
-    # print(sys.getsizeof(sec_key))
-    # print(sys.getsizeof(aux_rand))
 
-    return [schnorr_prep_t, schnorr_sign_t, schnorr_verify_t]
+def schnorr_performance_routine(c_init=100):
+
+    return run_schnorr_protocol_sha384()
 
 
-if __name__ == "__main__":
-    schnorr_performance_routine()
+

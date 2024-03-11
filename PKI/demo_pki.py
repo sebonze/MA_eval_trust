@@ -25,6 +25,7 @@ import uuid
 import binascii
 import sys
 
+
 # Function to generate a private key
 def generate_private_key(password=None):
     key = ec.generate_private_key(ec.SECP256K1())
@@ -34,8 +35,10 @@ def generate_private_key(password=None):
         encryption = serialization.NoEncryption()
     return key, key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, encryption)
 
+
 def sha384(b: bytes) -> bytes:
     return hashlib.sha384(b).digest()
+
 
 # Function to generate a self-signed CA certificate
 def generate_ca_certificate(private_key):
@@ -65,6 +68,7 @@ def generate_ca_certificate(private_key):
 
     return ca_cert.public_bytes(serialization.Encoding.PEM)
 
+
 # Load CA private key and certificate
 def load_ca_private_key_and_cert():
     with open("tmp_cert/ca_private_key.pem", "rb") as key_file:
@@ -77,6 +81,7 @@ def load_ca_private_key_and_cert():
         ca_certificate = x509.load_pem_x509_certificate(cert_file.read())
 
     return ca_private_key, ca_certificate
+
 
 # Function to issue a certificate
 def issue_certificate(subject_name, ca_private_key, ca_certificate):
@@ -108,6 +113,7 @@ def issue_certificate(subject_name, ca_private_key, ca_certificate):
 
     return private_key, cert.public_bytes(serialization.Encoding.PEM)
 
+
 # Function to validate a certificate
 def validate_certificate(certificate, ca_certificate):
     try:
@@ -120,6 +126,7 @@ def validate_certificate(certificate, ca_certificate):
         return True
     except InvalidSignature:
         return False
+
 
 # Function to revoke a certificate
 def revoke_certificate(certificate, ca_private_key, ca_certificate):
@@ -139,12 +146,14 @@ def revoke_certificate(certificate, ca_private_key, ca_certificate):
     )
     return crl.public_bytes(serialization.Encoding.PEM)
 
+
 # Function to check revocation status
 def is_certificate_revoked(certificate, crl):
     for revoked_cert in crl:
         if revoked_cert.serial_number == certificate.serial_number:
             return True
     return False
+
 
 def pki_routine(c_init=100):
     msg_hex = "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89"
@@ -217,36 +226,47 @@ def pki_routine(c_init=100):
 
     return [pki_prep_t, pki_sign_t, pki_verify_t]
 
-# Main routine
-if __name__ == "__main__":
-    pki_results = pki_routine()
-    print("PKI routine completed.")
 
 # -------------------------------------------------------------------------------------------------
-#
-def SIG(private_key, message):
-    """Generate a signature over the message using the private key."""
-    return sign_data(private_key, message)
 
 def generate_mac(key, message):
     cobj = CMAC.new(key, ciphermod=AES)
     cobj.update(message.encode())
     return cobj.digest()
 
+
+def verify_MAC(key, msg, MACtag, mac_len=16):
+    cobj = CMAC.new(key, ciphermod=AES, mac_len=mac_len)
+    cobj.update(msg)
+
+    try:
+        cobj.verify(MACtag)
+        return True
+    except ValueError:
+        return False
+
+
 def generate_nonce():
-    return os.urandom(16)
+    seed = uuid.uuid4().hex + uuid.uuid1().hex
+    nonce = ''
+    while len(nonce) < 12:
+        nonce += random.choice(seed)
+    return bytes(nonce, 'utf-8')
+
 
 def sign_message(private_key, message):
-    return private_key.sign(message.encode(), ec.ECDSA(hashes.SHA256()))
+    return private_key.sign(message.encode(), ec.ECDSA(hashes.SHA384()))
+
 
 # Protocol implementation starts here
+# UA = 28 bit, SAC = 12 bit identifiers, P_AS sidn ECDH pub key, N = 64 bit nonce, sigma = ECDSA signature, MAC = 128bit MAC tag
 class LDACSAuthenticationProtocol:
     def __init__(self):
         self.private_key_GS = generate_private_key()
         self.private_key_AS = generate_private_key()
-        self.k_M = os.urandom(16)  # Shared MAC key for demonstration purposes
-        self.P_GS = self.private_key_GS.public_key()
-        self.P_AS = self.private_key_AS.public_key()
+        self.kM = os.urandom(16)  # Shared MAC key for demonstration purposes
+        self.P_GS = self.private_key_GS[1]
+        self.P_AS = self.private_key_AS[1]
         self.N_GS = generate_nonce()
         self.N_AS = generate_nonce()
         # Real values for simulation/testing
@@ -255,23 +275,66 @@ class LDACSAuthenticationProtocol:
         self.SAC_GS = 'GS_ServiceAccessCredential'
         self.SAC_AS = 'AS_ServiceAccessCredential'
 
+        self.sigma_AS = None
+        self.t_AS = None
+        self.sigma_GS = None
+        self.t_GS = None
 
     def step1(self):
         # GS to AS: Send P_GS and N_GS
         return {"P_GS": self.P_GS, "N_GS": self.N_GS}
 
     def step2(self, P_GS, N_GS):
-        # AS to GS: Respond with P_AS, N_AS, σ_AS (signature), and t_AS (MAC)
+        # AS to GS: Respond with P_AS, N_AS, sigma_AS (signature), and t_AS (MAC)
         message = f"{self.P_AS}{P_GS}{self.UA_GS}{self.SAC_GS}{self.N_AS}"
-        σ_AS = sign_message(self.private_key_AS, message)
-        t_AS = generate_mac(self.k_M, message)
-        return {"P_AS": self.P_AS, "N_AS": self.N_AS, "σ_AS": σ_AS, "t_AS": t_AS}
+        sigma_AS = sign_message(self.private_key_AS[0], message)
+        t_AS = generate_mac(self.kM, message)
+        return {"P_AS": self.P_AS, "N_AS": self.N_AS, "sigma_AS": sigma_AS, "t_AS": t_AS}
 
-    def step3(self, P_AS, N_AS, σ_AS, t_AS):
-        # GS to AS: Send OCSP_Cert_GS (dummy), Cert_GS (dummy), σ_GS (signature), and t_GS (MAC)
+    def step3(self, P_AS, N_AS, sigma_AS, t_AS):
+        # GS to AS: Send OCSP_Cert_GS (dummy), Cert_GS (dummy), sigma_GS (signature), and t_GS (MAC)
         message = f"{self.P_GS}{P_AS}{self.UA_AS}{self.SAC_AS}{self.N_GS}"
-        σ_GS = sign_message(self.private_key_GS, message)
-        t_GS = generate_mac(self.k_M, message)
+        sigma_GS = sign_message(self.private_key_GS[0], message)
+        t_GS = generate_mac(self.kM, message)
         OCSP_Cert_GS = "OCSP_CERT_DUMMY"
         Cert_GS = "CERT_GS_DUMMY"
-        return {"OCSP_Cert_GS": OCSP_Cert_GS, "Cert_GS": Cert_GS, "σ_GS": σ_GS, "t_GS": t_GS}
+        return {"OCSP_Cert_GS": OCSP_Cert_GS, "Cert_GS": Cert_GS, "sigma_GS": sigma_GS, "t_GS": t_GS}
+
+
+def display_message_sizes(s1, s2, s3):
+    s1_size = sys.getsizeof(s1)
+    s2_size = sys.getsizeof(s2)
+    s3_size = sys.getsizeof(s3)
+    print(f"Size of step 1 (c): {s1_size} bytes")
+    print(f"Size of step 2 (e): {s2_size} bytes")
+    print(f"Size of step 3 (s): {s3_size} bytes")
+
+
+def run_pki_protocol_sha384(c_init=1):
+    pki_prep_t = []
+    pki_s2_t = []
+    pki_s3_t = []
+
+    start_time = time.perf_counter_ns()
+    pki = LDACSAuthenticationProtocol()
+    s1 = pki.step1()
+    pki_prep_t.append(time.perf_counter_ns() - start_time)
+
+    start_time = time.perf_counter_ns()
+    s2 = pki.step2(pki.P_GS, pki.N_GS)
+    pki_s2_t.append(time.perf_counter_ns() - start_time)
+
+    start_time = time.perf_counter_ns()
+    s3 = pki.step3(pki.P_AS, pki.N_AS, pki.sigma_AS, pki.t_AS)
+    pki_s3_t.append(time.perf_counter_ns() - start_time)
+
+    display_message_sizes(s1, s2, s3)
+    print("PKI protocol completed.")
+
+    return [pki_prep_t, pki_s2_t, pki_s3_t]
+
+
+# Main routine
+if __name__ == "__main__":
+    run_pki_protocol_sha384()
+
