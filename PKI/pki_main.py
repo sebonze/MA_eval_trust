@@ -1,7 +1,7 @@
-import PKI.demo_pki as demo_pki
+import PKI.LDACS_auth_pki as demo_pki
 
 
-def pki_performance_routine(c_init=1):
+def pki_performance_routine(c_init=100):
     return demo_pki.run_pki_protocol_sha384(c_init)
 
 

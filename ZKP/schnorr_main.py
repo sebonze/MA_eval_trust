@@ -67,8 +67,7 @@ def schnor_signature_routine():
 
 
 def schnorr_performance_routine(c_init=100):
-
-    return run_schnorr_protocol_sha384()
+    return run_schnorr_protocol_sha384(c_init)
 
 
 

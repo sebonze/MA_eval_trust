@@ -1,158 +1,27 @@
-import hashlib
+
 import sys
+
 from cryptography import x509
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import ec, padding
-from cryptography.x509.oid import NameOID
-from cryptography.exceptions import InvalidSignature
+
 from datetime import datetime, timedelta
 import os
 import time
 
-from cryptography.exceptions import InvalidSignature
+
 from cryptography.x509 import load_pem_x509_certificate, ocsp
-from cryptography.hazmat.backends import default_backend
+
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives.kdf.hkdf import HKDF
-from cryptography.hazmat.primitives.ciphers import algorithms
+
 
 from Crypto.Hash import CMAC
 from Crypto.Cipher import AES
 import datetime
 import random
 import uuid
-import binascii
-import sys
 
-
-# Function to generate a private key
-def generate_private_key(password=None):
-    key = ec.generate_private_key(ec.SECP256K1())
-    if password:
-        encryption = serialization.BestAvailableEncryption(password.encode())
-    else:
-        encryption = serialization.NoEncryption()
-    return key, key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, encryption)
-
-
-def sha384(b: bytes) -> bytes:
-    return hashlib.sha384(b).digest()
-
-
-# Function to generate a self-signed CA certificate
-def generate_ca_certificate(private_key):
-    subject = issuer = x509.Name([
-        x509.NameAttribute(NameOID.COUNTRY_NAME, u"DE"),
-        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"BAVARIA"),
-        x509.NameAttribute(NameOID.LOCALITY_NAME, u"DEISENHOFEN"),
-        x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"ASD DLR"),
-        x509.NameAttribute(NameOID.COMMON_NAME, u"TEST Root CA"),
-    ])
-
-    ca_cert = x509.CertificateBuilder().subject_name(
-        subject
-    ).issuer_name(
-        issuer
-    ).public_key(
-        private_key.public_key()
-    ).serial_number(
-        x509.random_serial_number()
-    ).not_valid_before(
-        datetime.utcnow()
-    ).not_valid_after(
-        datetime.utcnow() + timedelta(days=10 * 365)
-    ).add_extension(
-        x509.BasicConstraints(ca=True, path_length=None), critical=True,
-    ).sign(private_key, hashes.SHA256())
-
-    return ca_cert.public_bytes(serialization.Encoding.PEM)
-
-
-# Load CA private key and certificate
-def load_ca_private_key_and_cert():
-    with open("tmp_cert/ca_private_key.pem", "rb") as key_file:
-        ca_private_key = serialization.load_pem_private_key(
-            key_file.read(),
-            password=b'mysecurepassword'
-        )
-
-    with open("tmp_cert/ca_certificate.pem", "rb") as cert_file:
-        ca_certificate = x509.load_pem_x509_certificate(cert_file.read())
-
-    return ca_private_key, ca_certificate
-
-
-# Function to issue a certificate
-def issue_certificate(subject_name, ca_private_key, ca_certificate):
-    private_key = ec.generate_private_key(ec.SECP256K1())
-
-    subject = x509.Name([
-        x509.NameAttribute(NameOID.COUNTRY_NAME, u"DE"),
-        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"BAVARIA"),
-        x509.NameAttribute(NameOID.LOCALITY_NAME, u"DEISENHOFEN"),
-        x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"ASD DLR"),
-        x509.NameAttribute(NameOID.COMMON_NAME, subject_name),
-    ])
-
-    cert = x509.CertificateBuilder().subject_name(
-        subject
-    ).issuer_name(
-        ca_certificate.subject
-    ).public_key(
-        private_key.public_key()
-    ).serial_number(
-        x509.random_serial_number()
-    ).not_valid_before(
-        datetime.utcnow()
-    ).not_valid_after(
-        datetime.utcnow() + timedelta(days=365)
-    ).add_extension(
-        x509.BasicConstraints(ca=False, path_length=None), critical=True,
-    ).sign(ca_private_key, hashes.SHA256())
-
-    return private_key, cert.public_bytes(serialization.Encoding.PEM)
-
-
-# Function to validate a certificate
-def validate_certificate(certificate, ca_certificate):
-    try:
-        ca_public_key = ca_certificate.public_key()
-        ca_public_key.verify(
-            certificate.signature,
-            certificate.tbs_certificate_bytes,
-            ec.ECDSA(hashes.SHA256())
-        )
-        return True
-    except InvalidSignature:
-        return False
-
-
-# Function to revoke a certificate
-def revoke_certificate(certificate, ca_private_key, ca_certificate):
-    builder = x509.CertificateRevocationListBuilder()
-    builder = builder.issuer_name(ca_certificate.subject)
-    builder = builder.last_update(datetime.utcnow())
-    builder = builder.next_update(datetime.utcnow() + timedelta(days=30))
-    builder = builder.add_revoked_certificate(x509.RevokedCertificateBuilder().serial_number(
-        certificate.serial_number
-    ).revocation_date(
-        datetime.utcnow()
-    ).build())
-
-    crl = builder.sign(
-        private_key=ca_private_key,
-        algorithm=hashes.SHA256()
-    )
-    return crl.public_bytes(serialization.Encoding.PEM)
-
-
-# Function to check revocation status
-def is_certificate_revoked(certificate, crl):
-    for revoked_cert in crl:
-        if revoked_cert.serial_number == certificate.serial_number:
-            return True
-    return False
+from pki_util import generate_private_key, generate_ca_certificate, load_ca_private_key_and_cert, issue_certificate, \
+    validate_certificate, revoke_certificate, is_certificate_revoked, get_size
 
 
 def pki_routine(c_init=100):
@@ -229,6 +98,38 @@ def pki_routine(c_init=100):
 
 # -------------------------------------------------------------------------------------------------
 
+def build_OCSPresponse(id):
+
+    f = open("tmp_cert/entity1_certificate.pem", "rb")
+    cert = f.read()
+    f.close()
+    cert = load_pem_x509_certificate(cert)
+
+    # open issuer cert
+    f = open("tmp_cert/ca_certificate.pem", 'rb')
+    issuer_cert = f.read()
+    f.close()
+    responder_cert = load_pem_x509_certificate(issuer_cert)
+    f = open("tmp_cert/ca_private_key.pem", 'rb')
+    issuer_priv_key = f.read()
+    f.close()
+    responder_key = serialization.load_pem_private_key(issuer_priv_key, b'mysecurepassword')
+
+    builder = ocsp.OCSPResponseBuilder()
+    builder = builder.add_response(
+        cert=cert, issuer=responder_cert, algorithm=hashes.SHA256(),
+        cert_status=ocsp.OCSPCertStatus.GOOD,
+        this_update=datetime.datetime.now(),
+        next_update=datetime.datetime.now(),
+        revocation_time=None, revocation_reason=None
+    ).responder_id(
+        ocsp.OCSPResponderEncoding.HASH, responder_cert
+    )
+
+    response = builder.sign(responder_key, hashes.SHA384())
+    serialized_response = response.public_bytes(serialization.Encoding.DER)
+
+    return serialized_response
 def generate_mac(key, message):
     cobj = CMAC.new(key, ciphermod=AES)
     cobj.update(message.encode())
@@ -270,10 +171,10 @@ class LDACSAuthenticationProtocol:
         self.N_GS = generate_nonce()
         self.N_AS = generate_nonce()
         # Real values for simulation/testing
-        self.UA_GS = 'GroundStationIdentifier'
-        self.UA_AS = 'AircraftStationIdentifier'
-        self.SAC_GS = 'GS_ServiceAccessCredential'
-        self.SAC_AS = 'AS_ServiceAccessCredential'
+        self.UA_GS = random.getrandbits(28)
+        self.UA_AS = random.getrandbits(28)
+        self.SAC_GS = random.getrandbits(12)
+        self.SAC_AS = random.getrandbits(12)
 
         self.sigma_AS = None
         self.t_AS = None
@@ -292,41 +193,44 @@ class LDACSAuthenticationProtocol:
         return {"P_AS": self.P_AS, "N_AS": self.N_AS, "sigma_AS": sigma_AS, "t_AS": t_AS}
 
     def step3(self, P_AS, N_AS, sigma_AS, t_AS):
-        # GS to AS: Send OCSP_Cert_GS (dummy), Cert_GS (dummy), sigma_GS (signature), and t_GS (MAC)
+        # GS to AS: Send OCSP_Cert_GS , Cert_GS , sigma_GS (signature), and t_GS (MAC)
         message = f"{self.P_GS}{P_AS}{self.UA_AS}{self.SAC_AS}{self.N_GS}"
         sigma_GS = sign_message(self.private_key_GS[0], message)
         t_GS = generate_mac(self.kM, message)
-        OCSP_Cert_GS = "OCSP_CERT_DUMMY"
-        Cert_GS = "CERT_GS_DUMMY"
+        OCSP_Cert_GS = build_OCSPresponse(self.UA_GS)
+        Cert_GS = load_pem_x509_certificate(generate_ca_certificate(self.private_key_GS[0]))
         return {"OCSP_Cert_GS": OCSP_Cert_GS, "Cert_GS": Cert_GS, "sigma_GS": sigma_GS, "t_GS": t_GS}
 
 
 def display_message_sizes(s1, s2, s3):
-    s1_size = sys.getsizeof(s1)
-    s2_size = sys.getsizeof(s2)
-    s3_size = sys.getsizeof(s3)
+    s1_size = get_size(s1)
+    s2_size = get_size(s2)
+    s3_size = get_size(s3)
     print(f"Size of step 1 (c): {s1_size} bytes")
     print(f"Size of step 2 (e): {s2_size} bytes")
     print(f"Size of step 3 (s): {s3_size} bytes")
 
 
-def run_pki_protocol_sha384(c_init=1):
+def run_pki_protocol_sha384(c_init):
     pki_prep_t = []
     pki_s2_t = []
     pki_s3_t = []
 
-    start_time = time.perf_counter_ns()
-    pki = LDACSAuthenticationProtocol()
-    s1 = pki.step1()
-    pki_prep_t.append(time.perf_counter_ns() - start_time)
+    for c in range(c_init):
+        start_time = time.perf_counter_ns()
+        pki = LDACSAuthenticationProtocol()
+        s1 = pki.step1()
+        pki_prep_t.append(time.perf_counter_ns() - start_time)
 
-    start_time = time.perf_counter_ns()
-    s2 = pki.step2(pki.P_GS, pki.N_GS)
-    pki_s2_t.append(time.perf_counter_ns() - start_time)
+    for c in range(c_init):
+        start_time = time.perf_counter_ns()
+        s2 = pki.step2(pki.P_GS, pki.N_GS)
+        pki_s2_t.append(time.perf_counter_ns() - start_time)
 
-    start_time = time.perf_counter_ns()
-    s3 = pki.step3(pki.P_AS, pki.N_AS, pki.sigma_AS, pki.t_AS)
-    pki_s3_t.append(time.perf_counter_ns() - start_time)
+    for c in range(c_init):
+        start_time = time.perf_counter_ns()
+        s3 = pki.step3(pki.P_AS, pki.N_AS, pki.sigma_AS, pki.t_AS)
+        pki_s3_t.append(time.perf_counter_ns() - start_time)
 
     display_message_sizes(s1, s2, s3)
     print("PKI protocol completed.")

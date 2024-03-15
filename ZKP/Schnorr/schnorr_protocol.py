@@ -47,24 +47,28 @@ class SchnorrProtocolSHA384:
         print(f"Size of challenge (e): {e_size} bytes")
         print(f"Size of response (s): {s_size} bytes")
 
-def run_schnorr_protocol_sha384():
+def run_schnorr_protocol_sha384(c_init):
     schnorr_com_t = []
     schnorr_cha_t = []
     schnorr_res_t = []
 
-    start_time = time.perf_counter_ns()
-    schnorr = SchnorrProtocolSHA384()
-    c = schnorr.generate_commitment()
-    schnorr_com_t.append(time.perf_counter_ns() - start_time)
+    for c in range(c_init):
+        start_time = time.perf_counter_ns()
+        schnorr = SchnorrProtocolSHA384()
+        c = schnorr.generate_commitment()
+        schnorr_com_t.append(time.perf_counter_ns() - start_time)
 
-    start_time = time.perf_counter_ns()
-    e = schnorr.generate_challenge(c)
-    schnorr_cha_t.append(time.perf_counter_ns() - start_time)
+    for c in range(c_init):
+        start_time = time.perf_counter_ns()
+        e = schnorr.generate_challenge(c)
+        schnorr_cha_t.append(time.perf_counter_ns() - start_time)
 
-    start_time = time.perf_counter_ns()
-    s = schnorr.generate_response(e)
-    verification_result = schnorr.verify(c, e, s)
-    schnorr_res_t.append(time.perf_counter_ns() - start_time)
+    for c in range(c_init):
+        start_time = time.perf_counter_ns()
+        s = schnorr.generate_response(e)
+        verification_result = schnorr.verify(c, e, s)
+        assert verification_result
+        schnorr_res_t.append(time.perf_counter_ns() - start_time)
 
     schnorr.display_message_sizes(c, e, s)
     return [schnorr_com_t, schnorr_cha_t, schnorr_res_t]
