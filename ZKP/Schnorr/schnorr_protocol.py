@@ -52,18 +52,18 @@ def run_schnorr_protocol_sha384(c_init):
     schnorr_cha_t = []
     schnorr_res_t = []
 
-    for c in range(c_init):
-        start_time = time.perf_counter_ns()
+    for ci in range(c_init):
         schnorr = SchnorrProtocolSHA384()
+        start_time = time.perf_counter_ns()
         c = schnorr.generate_commitment()
         schnorr_com_t.append(time.perf_counter_ns() - start_time)
 
-    for c in range(c_init):
+    for ci in range(c_init):
         start_time = time.perf_counter_ns()
         e = schnorr.generate_challenge(c)
         schnorr_cha_t.append(time.perf_counter_ns() - start_time)
 
-    for c in range(c_init):
+    for ci in range(c_init):
         start_time = time.perf_counter_ns()
         s = schnorr.generate_response(e)
         verification_result = schnorr.verify(c, e, s)
@@ -74,4 +74,4 @@ def run_schnorr_protocol_sha384(c_init):
     return [schnorr_com_t, schnorr_cha_t, schnorr_res_t]
 
 if __name__ == "__main__":
-    run_schnorr_protocol_sha384()
+    run_schnorr_protocol_sha384(10)

@@ -66,7 +66,7 @@ def schnor_signature_routine():
         print(str(sys.getsizeof(msg) + sys.getsizeof(pubkey) + sys.getsizeof(sig_actual)) + ' bytes SCHNORR')
 
 
-def schnorr_performance_routine(c_init=100):
+def schnorr_performance_routine(c_init=1000):
     return run_schnorr_protocol_sha384(c_init)
 
 

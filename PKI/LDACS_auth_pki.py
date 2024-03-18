@@ -20,7 +20,8 @@ import datetime
 import random
 import uuid
 
-from pki_util import generate_private_key, generate_ca_certificate, load_ca_private_key_and_cert, issue_certificate, \
+
+from .pki_util import generate_private_key, generate_ca_certificate, load_ca_private_key_and_cert, issue_certificate, \
     validate_certificate, revoke_certificate, is_certificate_revoked, get_size
 
 
@@ -240,5 +241,5 @@ def run_pki_protocol_sha384(c_init):
 
 # Main routine
 if __name__ == "__main__":
-    run_pki_protocol_sha384()
+    run_pki_protocol_sha384(10)
 
